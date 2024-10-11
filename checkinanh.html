@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chụp ảnh với Thông tin</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,10 +16,14 @@
             margin: 0 auto;
             padding: 20px;
         }
-        #camera, #canvas, #photo {
+
+        #camera,
+        #canvas,
+        #photo {
             width: 100%;
             margin-bottom: 10px;
         }
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -25,6 +32,7 @@
             cursor: pointer;
             margin-bottom: 10px;
         }
+
         #infoDisplay {
             background-color: #f0f0f0;
             padding: 10px;
@@ -32,32 +40,63 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Chụp ảnh với Thông tin</h1>
     <video id="camera" autoplay playsinline></video>
     <button id="switchCameraBtn">Đổi Camera</button>
-    <button id="captureBtn">Chụp ảnh</button>
+    <button id="captureBtn">Chụp ảnh vào</button>
+    <button id="captureOutBtn">Chụp ảnh ra</button>
     <canvas id="canvas" style="display:none;"></canvas>
     <img id="photo" alt="Ảnh đã chụp sẽ xuất hiện ở đây.">
     <div id="infoDisplay"></div>
 
     <script>
+        // Constants for AppSheet API
+        const appId = '10aadcbe-4e60-4f7d-870e-cfdb7a5707c8';
+        const accessKey = 'V2-wCBT2-znuFG-8ZNLo-zphe2-ScGnE-rOoyW-WWJPF-Oa4h1';
+        const region = 'www';
+
         const camera = document.getElementById('camera');
         const captureBtn = document.getElementById('captureBtn');
+        const captureOutBtn = document.getElementById('captureOutBtn');
         const switchCameraBtn = document.getElementById('switchCameraBtn');
         const canvas = document.getElementById('canvas');
         const photo = document.getElementById('photo');
         const infoDisplay = document.getElementById('infoDisplay');
 
         let stream;
-        let facingMode = "user"; // Mặc định sử dụng camera trước
+        let facingMode = "user";
+        function apiRequest(tableName, action, data) {
+            const apiUrl = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/${tableName}/Action`;
+            return $.ajax({
+                url: apiUrl,
+                method: 'POST',
+                headers: {
+                    'ApplicationAccessKey': accessKey,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({
+                    Action: action,
+                    Properties: {
+                        Locale: 'vi-VN',
+                        Timezone: 'Asia/Ho_Chi_Minh'
+                    },
+                    ...data
+                })
+            }).then(response => {
+                return response;
+            }).catch(error => {
 
+                throw error;
+            });
+        }
         async function startCamera() {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
+                stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: facingMode }
                 });
                 camera.srcObject = stream;
@@ -69,33 +108,37 @@
 
         startCamera();
 
-        switchCameraBtn.addEventListener('click', function() {
+        switchCameraBtn.addEventListener('click', function () {
             facingMode = facingMode === "user" ? "environment" : "user";
             startCamera();
         });
 
-        captureBtn.addEventListener('click', function() {
-            getLocationAndTime();
+        captureBtn.addEventListener('click', function () {
+            getLocationAndTime('in');
         });
 
-        function getLocationAndTime() {
+        captureOutBtn.addEventListener('click', function () {
+            getLocationAndTime('out');
+        });
+
+        function getLocationAndTime(type) {
             if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(function(position) {
+                navigator.geolocation.getCurrentPosition(function (position) {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
-                    const currentTime = moment().tz("Asia/Bangkok").format('YYYY-MM-DD HH:mm:ss');
-                    
+                    const currentTime = moment().tz("Asia/Ho_Chi_Minh").format('YYYY-MM-DD HH:mm:ss');
+
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
                         .then(response => response.json())
                         .then(data => {
                             const address = data.display_name;
-                            captureAndAddInfo(lat, lon, address, currentTime);
+                            captureAndAddInfo(lat, lon, address, currentTime, type);
                         })
                         .catch(error => {
                             console.error('Lỗi khi lấy địa chỉ:', error);
-                            captureAndAddInfo(lat, lon, "Không thể lấy địa chỉ", currentTime);
+                            captureAndAddInfo(lat, lon, "Không thể lấy địa chỉ", currentTime, type);
                         });
-                }, function(error) {
+                }, function (error) {
                     console.error("Lỗi khi lấy vị trí: ", error);
                     alert("Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập.");
                 });
@@ -104,23 +147,20 @@
             }
         }
 
-        function captureAndAddInfo(lat, lon, address, time) {
+        function captureAndAddInfo(lat, lon, address, time, type) {
             canvas.width = camera.videoWidth;
             canvas.height = camera.videoHeight;
             const ctx = canvas.getContext('2d');
-            
-            // Chụp ảnh
+
             ctx.drawImage(camera, 0, 0);
-            
-            // Thêm thông tin vào ảnh
+
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
-            
+
             ctx.fillStyle = 'white';
             ctx.font = '12px Arial';
             ctx.fillText(`Vị trí: ${lat.toFixed(6)}, ${lon.toFixed(6)}`, 10, canvas.height - 60);
-            
-            // Chia địa chỉ thành hai dòng
+
             const words = address.split(' ');
             let line1 = '';
             let line2 = '';
@@ -134,19 +174,40 @@
             }
             ctx.fillText(`Địa chỉ: ${line1}`, 10, canvas.height - 40);
             ctx.fillText(line2, 10, canvas.height - 25);
-            
+
             ctx.fillText(`Thời gian: ${time}`, 10, canvas.height - 10);
-            
-            // Hiển thị ảnh với thông tin
-            photo.src = canvas.toDataURL('image/jpeg');
-            
-            // Hiển thị thông tin bên dưới ảnh
+
+            const imageDataUrl = canvas.toDataURL('image/jpeg');
+            photo.src = imageDataUrl;
+
             infoDisplay.innerHTML = `
                 <strong>Vị trí:</strong> ${lat}, ${lon}<br>
                 <strong>Địa chỉ:</strong> ${address}<br>
                 <strong>Thời gian:</strong> ${time}
             `;
+
+            sendToAppSheet(lat, lon, address, time, imageDataUrl, type);
+        }
+
+        async function sendToAppSheet(lat, lon, address, time, imageDataUrl, type) {
+            const [date, timeStr] = time.split(' ');
+            const ungVienData = {
+                "THỜI GIAN": timeStr,
+                "MÃ NHÂN VIÊN": "NV001", // Thay thế bằng mã nhân viên thực tế
+                "HỌ VÀ TÊN": "Nguyễn Văn A", // Thay thế bằng tên thực tế
+                "GHI CHÚ": "Check in",
+                "IN TT": timeStr,
+                "Hình ảnh vào": imageDataUrl,
+                "Địa chỉ vào": `${lat},${lon}`,
+                "Trạng thái": "Đã vào",
+
+            };
+            const duAnResponse = await apiRequest('LICH CV', 'Add', {
+                Rows: [ungVienData]
+            });
         }
     </script>
+
 </body>
+
 </html>
