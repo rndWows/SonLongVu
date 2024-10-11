@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chụp ảnh, Vị trí và Thời gian</title>
+    <title>Chụp ảnh với Thông tin</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
     <style>
@@ -33,7 +33,7 @@
     </style>
 </head>
 <body>
-    <h1>Chụp ảnh với Vị trí và Thời gian</h1>
+    <h1>Chụp ảnh với Thông tin</h1>
     <video id="camera" autoplay playsinline></video>
     <button id="captureBtn">Chụp ảnh</button>
     <canvas id="canvas" style="display:none;"></canvas>
@@ -62,10 +62,6 @@
         startCamera();
 
         captureBtn.addEventListener('click', function() {
-            canvas.width = camera.videoWidth;
-            canvas.height = camera.videoHeight;
-            canvas.getContext('2d').drawImage(camera, 0, 0);
-            photo.src = canvas.toDataURL('image/jpeg');
             getLocationAndTime();
         });
 
@@ -76,16 +72,15 @@
                     const lon = position.coords.longitude;
                     const currentTime = moment().tz("Asia/Bangkok").format('YYYY-MM-DD HH:mm:ss');
                     
-                    // Lấy địa chỉ từ tọa độ
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
                         .then(response => response.json())
                         .then(data => {
                             const address = data.display_name;
-                            displayInfo(lat, lon, address, currentTime);
+                            captureAndAddInfo(lat, lon, address, currentTime);
                         })
                         .catch(error => {
                             console.error('Lỗi khi lấy địa chỉ:', error);
-                            displayInfo(lat, lon, "Không thể lấy địa chỉ", currentTime);
+                            captureAndAddInfo(lat, lon, "Không thể lấy địa chỉ", currentTime);
                         });
                 }, function(error) {
                     console.error("Lỗi khi lấy vị trí: ", error);
@@ -96,7 +91,28 @@
             }
         }
 
-        function displayInfo(lat, lon, address, time) {
+        function captureAndAddInfo(lat, lon, address, time) {
+            canvas.width = camera.videoWidth;
+            canvas.height = camera.videoHeight;
+            const ctx = canvas.getContext('2d');
+            
+            // Chụp ảnh
+            ctx.drawImage(camera, 0, 0);
+            
+            // Thêm thông tin vào ảnh
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.fillText(`Vị trí: ${lat.toFixed(6)}, ${lon.toFixed(6)}`, 10, canvas.height - 40);
+            ctx.fillText(`Địa chỉ: ${address.substring(0, 50)}...`, 10, canvas.height - 25);
+            ctx.fillText(`Thời gian: ${time}`, 10, canvas.height - 10);
+            
+            // Hiển thị ảnh với thông tin
+            photo.src = canvas.toDataURL('image/jpeg');
+            
+            // Hiển thị thông tin bên dưới ảnh
             infoDisplay.innerHTML = `
                 <strong>Vị trí:</strong> ${lat}, ${lon}<br>
                 <strong>Địa chỉ:</strong> ${address}<br>
