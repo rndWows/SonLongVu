@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chụp ảnh, Vị trí và Thời gian</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #camera, #canvas, #photo {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        #infoDisplay {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chụp ảnh với Vị trí và Thời gian</h1>
+    <video id="camera" autoplay playsinline></video>
+    <button id="captureBtn">Chụp ảnh</button>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <img id="photo" alt="Ảnh đã chụp sẽ xuất hiện ở đây.">
+    <div id="infoDisplay"></div>
+
+    <script>
+        const camera = document.getElementById('camera');
+        const captureBtn = document.getElementById('captureBtn');
+        const canvas = document.getElementById('canvas');
+        const photo = document.getElementById('photo');
+        const infoDisplay = document.getElementById('infoDisplay');
+
+        let stream;
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                camera.srcObject = stream;
+            } catch (err) {
+                console.error("Không thể truy cập camera: ", err);
+                alert("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.");
+            }
+        }
+
+        startCamera();
+
+        captureBtn.addEventListener('click', function() {
+            canvas.width = camera.videoWidth;
+            canvas.height = camera.videoHeight;
+            canvas.getContext('2d').drawImage(camera, 0, 0);
+            photo.src = canvas.toDataURL('image/jpeg');
+            getLocationAndTime();
+        });
+
+        function getLocationAndTime() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const currentTime = moment().tz("Asia/Bangkok").format('YYYY-MM-DD HH:mm:ss');
+                    
+                    // Lấy địa chỉ từ tọa độ
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const address = data.display_name;
+                            displayInfo(lat, lon, address, currentTime);
+                        })
+                        .catch(error => {
+                            console.error('Lỗi khi lấy địa chỉ:', error);
+                            displayInfo(lat, lon, "Không thể lấy địa chỉ", currentTime);
+                        });
+                }, function(error) {
+                    console.error("Lỗi khi lấy vị trí: ", error);
+                    alert("Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập.");
+                });
+            } else {
+                alert("Trình duyệt của bạn không hỗ trợ geolocation.");
+            }
+        }
+
+        function displayInfo(lat, lon, address, time) {
+            infoDisplay.innerHTML = `
+                <strong>Vị trí:</strong> ${lat}, ${lon}<br>
+                <strong>Địa chỉ:</strong> ${address}<br>
+                <strong>Thời gian:</strong> ${time}
+            `;
+        }
+    </script>
+</body>
+</html>
