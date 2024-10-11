@@ -1,55 +1,84 @@
 <!DOCTYPE html>
-<html lang="vi">
-
+<html lang="vi" class="h-full bg-gray-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chụp ảnh với Thông tin</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        #camera,
-        #canvas,
-        #photo {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            border: none;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        #infoDisplay {
-            background-color: #f0f0f0;
-            padding: 10px;
-            margin-top: 10px;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="h-full">
+    <div class="min-h-full">
+        <nav class="bg-gray-800">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex h-16 items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <img class="h-8 w-8" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company">
+                        </div>
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#" class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium" aria-current="page">Chụp ảnh</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
 
-<body>
-    <h1>Chụp ảnh với Thông tin</h1>
-    <video id="camera" autoplay playsinline></video>
-    <button id="switchCameraBtn">Đổi Camera</button>
-    <button id="captureBtn">Chụp ảnh vào</button>
-    <button id="captureOutBtn">Chụp ảnh ra</button>
-    <canvas id="canvas" style="display:none;"></canvas>
-    <img id="photo" alt="Ảnh đã chụp sẽ xuất hiện ở đây.">
-    <div id="infoDisplay"></div>
+        <header class="bg-white shadow">
+            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900">Chụp ảnh với Thông tin</h1>
+            </div>
+        </header>
+
+        <main>
+            <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="overflow-hidden rounded-lg bg-white shadow">
+                        <div class="px-4 py-5 sm:p-6">
+                            <video id="camera" class="w-full rounded-lg shadow-md mb-4" autoplay playsinline></video>
+                            <div class="flex space-x-4 mb-4">
+                                <button id="switchCameraBtn" class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Đổi Camera</button>
+                                <button id="captureBtn" class="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">Chụp ảnh vào</button>
+                                <button id="captureOutBtn" class="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600">Chụp ảnh ra</button>
+                            </div>
+                            <canvas id="canvas" class="hidden"></canvas>
+                            <img id="photo" class="w-full rounded-lg shadow-md mb-4" alt="Ảnh đã chụp sẽ xuất hiện ở đây.">
+                            <div id="infoDisplay" class="bg-gray-100 p-4 rounded-lg shadow-inner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="notification" class="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start hidden">
+        <div class="w-full flex flex-col items-center space-y-4 sm:items-end">
+            <div class="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden">
+                <div class="p-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-3 w-0 flex-1 pt-0.5">
+                            <p id="notificationMessage" class="text-sm font-medium text-gray-900"></p>
+                        </div>
+                        <div class="ml-4 flex-shrink-0 flex">
+                            <button id="closeNotification" class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <span class="sr-only">Đóng</span>
+                                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Constants for AppSheet API
@@ -64,9 +93,13 @@
         const canvas = document.getElementById('canvas');
         const photo = document.getElementById('photo');
         const infoDisplay = document.getElementById('infoDisplay');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notificationMessage');
+        const closeNotification = document.getElementById('closeNotification');
 
         let stream;
         let facingMode = "user";
+
         function apiRequest(tableName, action, data) {
             const apiUrl = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/${tableName}/Action`;
             return $.ajax({
@@ -87,10 +120,10 @@
             }).then(response => {
                 return response;
             }).catch(error => {
-
                 throw error;
             });
         }
+
         async function startCamera() {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
@@ -102,7 +135,7 @@
                 camera.srcObject = stream;
             } catch (err) {
                 console.error("Không thể truy cập camera: ", err);
-                alert("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.");
+                showNotification("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.");
             }
         }
 
@@ -140,10 +173,10 @@
                         });
                 }, function (error) {
                     console.error("Lỗi khi lấy vị trí: ", error);
-                    alert("Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập.");
+                    showNotification("Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập.");
                 });
             } else {
-                alert("Trình duyệt của bạn không hỗ trợ geolocation.");
+                showNotification("Trình duyệt của bạn không hỗ trợ geolocation.");
             }
         }
 
@@ -181,9 +214,9 @@
             photo.src = imageDataUrl;
 
             infoDisplay.innerHTML = `
-                <strong>Vị trí:</strong> ${lat}, ${lon}<br>
-                <strong>Địa chỉ:</strong> ${address}<br>
-                <strong>Thời gian:</strong> ${time}
+                <p class="mb-2"><strong class="font-semibold">Vị trí:</strong> ${lat}, ${lon}</p>
+                <p class="mb-2"><strong class="font-semibold">Địa chỉ:</strong> ${address}</p>
+                <p><strong class="font-semibold">Thời gian:</strong> ${time}</p>
             `;
 
             sendToAppSheet(lat, lon, address, time, imageDataUrl, type);
@@ -193,21 +226,43 @@
             const [date, timeStr] = time.split(' ');
             const ungVienData = {
                 "THỜI GIAN": timeStr,
-                "MÃ NHÂN VIÊN": "NV001", // Thay thế bằng mã nhân viên thực tế
-                "HỌ VÀ TÊN": "Nguyễn Văn A", // Thay thế bằng tên thực tế
-                "GHI CHÚ": "Check in",
-                "IN TT": timeStr,
-                "Hình ảnh vào": imageDataUrl,
-                "Địa chỉ vào": `${lat},${lon}`,
-                "Trạng thái": "Đã vào",
-
+                "MÃ NHÂN VIÊN": "NV001", // Replace with the actual employee ID
+                "HỌ VÀ TÊN": "Nguyễn Văn A", // Replace with the actual name
+                "GHI CHÚ": type === 'in' ? "Check in" : "Check out",
+                "IN TT": type === 'in' ? timeStr : null,
+                "OUT TT": type === 'out' ? timeStr : null,
+                "Hình ảnh vào": type === 'in' ? imageDataUrl : null,
+                "Hình ảnh ra": type === 'out' ? imageDataUrl : null,
+                "Địa chỉ vào": type === 'in' ? `${lat},${lon}` : null,
+                "Địa chỉ ra": type === 'out' ? `${lat},${lon}` : null,
+                "Trạng thái": type === 'in' ? "Đã vào" : "Đã ra",
             };
-            const duAnResponse = await apiRequest('LICH CV', 'Add', {
-                Rows: [ungVienData]
-            });
+
+            try {
+                const duAnResponse = await apiRequest('LICH CV', 'Add', {
+                    Rows: [ungVienData]
+                });
+                showNotification(`Đã gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'} thành công!`);
+            } catch (error) {
+                console.error('Lỗi khi gửi dữ liệu:', error);
+                showNotification(`Lỗi khi gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'}. Vui lòng thử lại.`);
+            }
         }
+
+        function showNotification(message) {
+            notificationMessage.textContent = message;
+            notification.classList.remove('hidden');
+            setTimeout(() => {
+                hideNotification();
+            }, 5000);
+        }
+
+        function hideNotification() {
+            notification.classList.add('hidden');
+        }
+
+        closeNotification.addEventListener('click', hideNotification);
+
     </script>
-
 </body>
-
 </html>
