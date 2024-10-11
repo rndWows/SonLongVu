@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,48 +25,105 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        button {
-            width: 100%;
-            background-color: #4CAF50;
-            color: white;
+        .button-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        .button-container button {
+            flex: 1;
             padding: 10px;
+            font-size: 16px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-bottom: 10px;
-            font-size: 16px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
         }
 
-        #infoDisplay {
-            background-color: #ffffff;
-            padding: 15px;
-            margin-top: 10px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            font-size: 14px;
+        .button-container button i {
+            margin-right: 8px;
         }
 
-        #infoDisplay strong {
-            color: #4CAF50;
-        }
-
-        .alert {
-            padding: 10px;
+        #switchCameraBtn {
             background-color: #4CAF50;
+        }
+
+        #captureBtn, #captureOutBtn {
+            background-color: #2196F3;
+        }
+
+        #backBtn {
+            background-color: #f44336;
+        }
+
+        #switchCameraBtn:hover {
+            background-color: #45a049;
+        }
+
+        #captureBtn:hover, #captureOutBtn:hover {
+            background-color: #1e88e5;
+        }
+
+        #backBtn:hover {
+            background-color: #e53935;
+        }
+
+        .alert, .loading, .fullscreen-message {
+            padding: 15px;
             color: white;
             margin-bottom: 15px;
             border-radius: 5px;
+            text-align: center;
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #4CAF50;
+            font-size: 18px;
+            z-index: 9999;
         }
 
         .loading {
-            padding: 10px;
             background-color: #ffa500;
-            color: white;
-            margin-bottom: 15px;
+        }
+
+        .fullscreen-message {
+            display: block;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 1px solid #ccc;
             border-radius: 5px;
-            display: none;
-            text-align: center;
+            background-color: white;
+            color: black;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .button-container button:hover {
+            background-color: #e0e0e0;
+            border-color: #999;
+        }
+
+        .button-container button:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background-color: #f4f4f4;
         }
     </style>
 </head>
@@ -74,16 +132,26 @@
     <h1>Chụp ảnh với Thông tin</h1>
     <div id="loadingBox" class="loading">Đang gửi dữ liệu...</div>
     <div id="alertBox" class="alert"></div>
-    <video id="camera" autoplay playsinline></video>
-    <button id="switchCameraBtn">Đổi Camera</button>
-    <button id="captureBtn">Chụp ảnh vào</button>
-    <button id="captureOutBtn">Chụp ảnh ra</button>
-    <canvas id="canvas" style="display:none;"></canvas>
-    <img id="photo" alt="Ảnh đã chụp sẽ xuất hiện ở đây.">
-    <div id="infoDisplay"></div>
+    
+    <div class="button-container">
+        <button id="checkInBtn">Check In</button>
+        <button id="checkOutBtn">Check Out</button>
+    </div>
+
+    <div id="cameraContainer" style="display:none;">
+        <video id="camera" autoplay playsinline></video>
+        <div class="button-container">
+            <button id="switchCameraBtn"><i class="fas fa-sync-alt"></i>Đổi Camera</button>
+            <button id="captureBtn"><i class="fas fa-camera"></i>Chụp ảnh vào</button>
+            <button id="captureOutBtn" style="display: none;"><i class="fas fa-camera"></i>Chụp ảnh ra</button>
+            <button id="backBtn"><i class="fas fa-arrow-left"></i>Quay lại</button>
+        </div>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <img id="photo" alt="Ảnh đã chụp sẽ xuất hiện ở đây.">
+        <div id="infoDisplay"></div>
+    </div>
 
     <script>
-        // Constants for AppSheet API
         const appId = '10aadcbe-4e60-4f7d-870e-cfdb7a5707c8';
         const accessKey = 'V2-wCBT2-znuFG-8ZNLo-zphe2-ScGnE-rOoyW-WWJPF-Oa4h1';
         const region = 'www';
@@ -92,7 +160,9 @@
         const captureBtn = document.getElementById('captureBtn');
         const captureOutBtn = document.getElementById('captureOutBtn');
         const switchCameraBtn = document.getElementById('switchCameraBtn');
-        const canvas = document.getElementById('canvas');
+        const backBtn = document.getElementById('backBtn');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const checkInOutChoice = document.getElementById('checkInOutChoice');
         const photo = document.getElementById('photo');
         const infoDisplay = document.getElementById('infoDisplay');
         const alertBox = document.getElementById('alertBox');
@@ -113,6 +183,15 @@
 
         function hideLoading() {
             loadingBox.style.display = "none";
+        }
+
+        function showFullScreenMessage(message) {
+            alertBox.textContent = message;
+            alertBox.classList.add("fullscreen-message");
+            setTimeout(() => {
+                alertBox.classList.remove("fullscreen-message");
+                alertBox.style.display = "none";
+            }, 3000);
         }
 
         async function startCamera() {
@@ -138,15 +217,16 @@
         });
 
         captureBtn.addEventListener('click', function () {
-            if (confirm("Bạn có chắc chắn muốn gửi thông tin 'check-in'?")) {
-                getLocationAndTime('in');
-            }
+            getLocationAndTime('in');
         });
 
         captureOutBtn.addEventListener('click', function () {
-            if (confirm("Bạn có chắc chắn muốn gửi thông tin 'check-out'?")) {
-                getLocationAndTime('out');
-            }
+            getLocationAndTime('out');
+        });
+
+        backBtn.addEventListener('click', function () {
+            cameraContainer.style.display = 'none';
+            checkInOutChoice.style.display = 'block';
         });
 
         function getLocationAndTime(type) {
@@ -155,7 +235,7 @@
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     const currentTime = moment().tz("Asia/Ho_Chi_Minh").format('YYYY-MM-DD HH:mm:ss');
-
+                    
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
                         .then(response => response.json())
                         .then(data => {
@@ -176,19 +256,15 @@
         }
 
         function captureAndAddInfo(lat, lon, address, time, type) {
+            const ctx = canvas.getContext('2d');
             canvas.width = camera.videoWidth;
             canvas.height = camera.videoHeight;
-            const ctx = canvas.getContext('2d');
-
             ctx.drawImage(camera, 0, 0);
-
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
-
             ctx.fillStyle = 'white';
             ctx.font = '12px Arial';
             ctx.fillText(`Vị trí: ${lat.toFixed(6)}, ${lon.toFixed(6)}`, 10, canvas.height - 60);
-
             const words = address.split(' ');
             let line1 = '';
             let line2 = '';
@@ -202,9 +278,8 @@
             }
             ctx.fillText(`Địa chỉ: ${line1}`, 10, canvas.height - 40);
             ctx.fillText(line2, 10, canvas.height - 25);
-
             ctx.fillText(`Thời gian: ${time}`, 10, canvas.height - 10);
-
+            
             const imageDataUrl = canvas.toDataURL('image/jpeg');
             photo.src = imageDataUrl;
 
@@ -236,13 +311,13 @@
 
             try {
                 const duAnResponse = await apiRequest('LICH CV', 'Add', { Rows: [ungVienData] });
-                showAlert(`Đã gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'} thành công!`);
+                showFullScreenMessage(`Đã gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'} thành công!`);
                 setTimeout(() => {
                     location.reload();
                 }, 3000);
             } catch (error) {
                 console.error('Error sending data:', error);
-                showAlert(`Lỗi khi gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'}. Vui lòng thử lại.`);
+                showFullScreenMessage(`Lỗi khi gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'}. Vui lòng thử lại.`);
             } finally {
                 hideLoading();
             }
@@ -271,6 +346,24 @@
                 throw error;
             });
         }
+
+        $(document).ready(function() {
+            $('#checkInOutChoice').show();
+        });
+
+        $('#checkInBtn').on('click', function () {
+            $('#checkInOutChoice').hide();
+            $('#cameraContainer').show();
+            $('#captureOutBtn').hide();
+            $('#captureBtn').show();
+        });
+
+        $('#checkOutBtn').on('click', function () {
+            $('#checkInOutChoice').hide();
+            $('#cameraContainer').show();
+            $('#captureBtn').hide();
+            $('#captureOutBtn').show();
+        });
     </script>
 </body>
 
