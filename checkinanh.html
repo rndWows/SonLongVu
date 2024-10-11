@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chụp ảnh với Thông tin</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <style>
         body {
@@ -15,34 +14,66 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f4f4f9;
         }
 
-        #camera,
-        #canvas,
-        #photo {
+        #camera, #canvas, #photo {
             width: 100%;
             margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         button {
+            width: 100%;
             background-color: #4CAF50;
             color: white;
             padding: 10px;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
             margin-bottom: 10px;
+            font-size: 16px;
         }
 
         #infoDisplay {
-            background-color: #f0f0f0;
-            padding: 10px;
+            background-color: #ffffff;
+            padding: 15px;
             margin-top: 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+
+        #infoDisplay strong {
+            color: #4CAF50;
+        }
+
+        .alert {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .loading {
+            padding: 10px;
+            background-color: #ffa500;
+            color: white;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            display: none;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
     <h1>Chụp ảnh với Thông tin</h1>
+    <div id="loadingBox" class="loading">Đang gửi dữ liệu...</div>
+    <div id="alertBox" class="alert"></div>
     <video id="camera" autoplay playsinline></video>
     <button id="switchCameraBtn">Đổi Camera</button>
     <button id="captureBtn">Chụp ảnh vào</button>
@@ -64,33 +95,26 @@
         const canvas = document.getElementById('canvas');
         const photo = document.getElementById('photo');
         const infoDisplay = document.getElementById('infoDisplay');
+        const alertBox = document.getElementById('alertBox');
+        const loadingBox = document.getElementById('loadingBox');
 
         let stream;
         let facingMode = "user";
-        function apiRequest(tableName, action, data) {
-            const apiUrl = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/${tableName}/Action`;
-            return $.ajax({
-                url: apiUrl,
-                method: 'POST',
-                headers: {
-                    'ApplicationAccessKey': accessKey,
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify({
-                    Action: action,
-                    Properties: {
-                        Locale: 'vi-VN',
-                        Timezone: 'Asia/Ho_Chi_Minh'
-                    },
-                    ...data
-                })
-            }).then(response => {
-                return response;
-            }).catch(error => {
 
-                throw error;
-            });
+        function showAlert(message) {
+            alertBox.textContent = message;
+            alertBox.style.display = "block";
+            setTimeout(() => { alertBox.style.display = "none"; }, 3000);
         }
+
+        function showLoading() {
+            loadingBox.style.display = "block";
+        }
+
+        function hideLoading() {
+            loadingBox.style.display = "none";
+        }
+
         async function startCamera() {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
@@ -102,7 +126,7 @@
                 camera.srcObject = stream;
             } catch (err) {
                 console.error("Không thể truy cập camera: ", err);
-                alert("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.");
+                showAlert("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.");
             }
         }
 
@@ -114,11 +138,15 @@
         });
 
         captureBtn.addEventListener('click', function () {
-            getLocationAndTime('in');
+            if (confirm("Bạn có chắc chắn muốn gửi thông tin 'check-in'?")) {
+                getLocationAndTime('in');
+            }
         });
 
         captureOutBtn.addEventListener('click', function () {
-            getLocationAndTime('out');
+            if (confirm("Bạn có chắc chắn muốn gửi thông tin 'check-out'?")) {
+                getLocationAndTime('out');
+            }
         });
 
         function getLocationAndTime(type) {
@@ -140,10 +168,10 @@
                         });
                 }, function (error) {
                     console.error("Lỗi khi lấy vị trí: ", error);
-                    alert("Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập.");
+                    showAlert("Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập.");
                 });
             } else {
-                alert("Trình duyệt của bạn không hỗ trợ geolocation.");
+                showAlert("Trình duyệt của bạn không hỗ trợ geolocation.");
             }
         }
 
@@ -190,11 +218,12 @@
         }
 
         async function sendToAppSheet(lat, lon, address, time, imageDataUrl, type) {
+            showLoading();
             const [date, timeStr] = time.split(' ');
             const ungVienData = {
                 "THỜI GIAN": timeStr,
-                "MÃ NHÂN VIÊN": "NV001", // Replace with the actual employee ID
-                "HỌ VÀ TÊN": "Nguyễn Văn A", // Replace with the actual name
+                "MÃ NHÂN VIÊN": "NV001",
+                "HỌ VÀ TÊN": "Nguyễn Văn A",
                 "GHI CHÚ": type === 'in' ? "Check in" : "Check out",
                 "IN TT": type === 'in' ? timeStr : null,
                 "OUT TT": type === 'out' ? timeStr : null,
@@ -206,19 +235,43 @@
             };
 
             try {
-                const duAnResponse = await apiRequest('LICH CV', 'Add', {
-                    Rows: [ungVienData]
-                });
-                console.log('Data sent successfully:', duAnResponse);
-                alert(`Đã gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'} thành công!`);
+                const duAnResponse = await apiRequest('LICH CV', 'Add', { Rows: [ungVienData] });
+                showAlert(`Đã gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'} thành công!`);
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
             } catch (error) {
                 console.error('Error sending data:', error);
-                alert(`Lỗi khi gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'}. Vui lòng thử lại.`);
+                showAlert(`Lỗi khi gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'}. Vui lòng thử lại.`);
+            } finally {
+                hideLoading();
             }
         }
 
+        function apiRequest(tableName, action, data) {
+            const apiUrl = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/${tableName}/Action`;
+            return $.ajax({
+                url: apiUrl,
+                method: 'POST',
+                headers: {
+                    'ApplicationAccessKey': accessKey,
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({
+                    Action: action,
+                    Properties: {
+                        Locale: 'vi-VN',
+                        Timezone: 'Asia/Ho_Chi_Minh'
+                    },
+                    ...data
+                })
+            }).then(response => {
+                return response;
+            }).catch(error => {
+                throw error;
+            });
+        }
     </script>
-
 </body>
 
 </html>
