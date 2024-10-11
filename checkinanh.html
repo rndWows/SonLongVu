@@ -35,6 +35,7 @@
 <body>
     <h1>Chụp ảnh với Thông tin</h1>
     <video id="camera" autoplay playsinline></video>
+    <button id="switchCameraBtn">Đổi Camera</button>
     <button id="captureBtn">Chụp ảnh</button>
     <canvas id="canvas" style="display:none;"></canvas>
     <img id="photo" alt="Ảnh đã chụp sẽ xuất hiện ở đây.">
@@ -43,15 +44,22 @@
     <script>
         const camera = document.getElementById('camera');
         const captureBtn = document.getElementById('captureBtn');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
         const canvas = document.getElementById('canvas');
         const photo = document.getElementById('photo');
         const infoDisplay = document.getElementById('infoDisplay');
 
         let stream;
+        let facingMode = "user"; // Mặc định sử dụng camera trước
 
         async function startCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: facingMode }
+                });
                 camera.srcObject = stream;
             } catch (err) {
                 console.error("Không thể truy cập camera: ", err);
@@ -60,6 +68,11 @@
         }
 
         startCamera();
+
+        switchCameraBtn.addEventListener('click', function() {
+            facingMode = facingMode === "user" ? "environment" : "user";
+            startCamera();
+        });
 
         captureBtn.addEventListener('click', function() {
             getLocationAndTime();
@@ -101,12 +114,27 @@
             
             // Thêm thông tin vào ảnh
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
+            ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
             
             ctx.fillStyle = 'white';
             ctx.font = '12px Arial';
-            ctx.fillText(`Vị trí: ${lat.toFixed(6)}, ${lon.toFixed(6)}`, 10, canvas.height - 40);
-            ctx.fillText(`Địa chỉ: ${address.substring(0, 50)}...`, 10, canvas.height - 25);
+            ctx.fillText(`Vị trí: ${lat.toFixed(6)}, ${lon.toFixed(6)}`, 10, canvas.height - 60);
+            
+            // Chia địa chỉ thành hai dòng
+            const words = address.split(' ');
+            let line1 = '';
+            let line2 = '';
+            for (let i = 0; i < words.length; i++) {
+                if (ctx.measureText(line1 + words[i] + ' ').width < canvas.width - 20) {
+                    line1 += words[i] + ' ';
+                } else {
+                    line2 = words.slice(i).join(' ');
+                    break;
+                }
+            }
+            ctx.fillText(`Địa chỉ: ${line1}`, 10, canvas.height - 40);
+            ctx.fillText(line2, 10, canvas.height - 25);
+            
             ctx.fillText(`Thời gian: ${time}`, 10, canvas.height - 10);
             
             // Hiển thị ảnh với thông tin
