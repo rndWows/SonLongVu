@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Lấy Vị Trí, Địa Chỉ và Thời Gian</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        form {
+            display: grid;
+            gap: 10px;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Form Lấy Vị Trí, Địa Chỉ và Thời Gian</h1>
+    <form id="locationTimeForm">
+        <label for="address">Địa chỉ:</label>
+        <input type="text" id="address" name="address" readonly>
+        
+        <label for="latlong">Vĩ độ và Kinh độ:</label>
+        <input type="text" id="latlong" name="latlong" readonly>
+        
+        <label for="checkinTime">Thời gian check-in:</label>
+        <input type="text" id="checkinTime" name="checkinTime" readonly>
+        
+        <input type="submit" value="Lấy thông tin">
+    </form>
+
+    <script>
+        document.getElementById('locationTimeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lon = position.coords.longitude;
+                    
+                    // Cập nhật trường latlong
+                    document.getElementById('latlong').value = lat + ", " + lon;
+                    
+                    // Lấy địa chỉ từ tọa độ
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            document.getElementById('address').value = data.display_name;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            document.getElementById('address').value = "Không thể lấy địa chỉ";
+                        });
+                    
+                    // Lấy thời gian hiện tại và định dạng
+                    var currentTime = moment().tz("Asia/Bangkok").format('YYYY-MM-DD HH:mm:ss');
+                    document.getElementById('checkinTime').value = currentTime;
+                });
+            } else {
+                alert("Trình duyệt của bạn không hỗ trợ geolocation.");
+            }
+        });
+    </script>
+</body>
+</html>
