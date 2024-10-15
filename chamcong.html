@@ -350,6 +350,15 @@
                 showToast("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.", 'error');
             }
         };
+
+        const stopCamera = () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            elements.camera.srcObject = null;
+        };
+
+
         const switchCamera = async () => {
             facingMode = facingMode === "user" ? "environment" : "user";
             await startCamera();
@@ -444,6 +453,7 @@
             elements.usernameInput.value = '';
             elements.passwordInput.value = '';
             currentUser = null;
+            stopCamera();
         };
 
         // Check-in/out functions
@@ -458,10 +468,10 @@
             const datee = currentTime.format('YYYY-MM-DD');
             const hour = parseInt(timeStr.split(':')[0], 10);
             try {
-                const existingRecord = await checkExistingRecord(idChamCong );
+                const existingRecord = await checkExistingRecord(idChamCong);
 
                 let newData = {
-                    "ID CV": idChamCong ,
+                    "ID CV": idChamCong,
                     "NGÀY": datee,
                     "HỌ VÀ TÊN": fullName,
                     "GHI CHÚ": `Check ${type} qua API`
@@ -494,7 +504,7 @@
 
                     if (response && response.Rows && response.Rows.length > 0) {
                         const sentData = response.Rows[0];
-                        if (sentData['ID CV'] === idChamCong ) {
+                        if (sentData['ID CV'] === idChamCong) {
                             showToast(`Đã gửi thông tin check-${type} thành công!`);
                         } else {
                             console.warn('Dữ liệu gửi không khớp:', sentData);
@@ -566,18 +576,21 @@
             elements.cameraContainer.classList.add('hidden');
             elements.checkInOutChoice.classList.remove('hidden');
             updateButtonVisibility('initial');
+            stopCamera();
         });
 
         elements.checkInBtn.addEventListener('click', () => {
             elements.checkInOutChoice.classList.add('hidden');
             elements.cameraContainer.classList.remove('hidden');
             updateButtonVisibility('in');
+            startCamera();
         });
 
         elements.checkOutBtn.addEventListener('click', () => {
             elements.checkInOutChoice.classList.add('hidden');
             elements.cameraContainer.classList.remove('hidden');
             updateButtonVisibility('out');
+            startCamera();
         });
 
         elements.logoutBtn.addEventListener('click', logout);
@@ -587,7 +600,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             checkLoginStatus();
             updateButtonVisibility('initial');
-            startCamera();
 
         });
     </script>
