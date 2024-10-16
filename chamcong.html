@@ -60,15 +60,6 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input id="rememberLogin" name="rememberLogin" type="checkbox"
-                                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                                <label for="rememberLogin" class="ml-2 block text-sm text-gray-900">Ghi nhớ đăng
-                                    nhập</label>
-                            </div>
-                        </div>
-
                         <div>
                             <button id="loginBtn" type="button"
                                 class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -174,30 +165,7 @@
 
     <script>
 
-        // Vô hiệu hóa chuột phải
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        }, false);
-
-        // Vô hiệu hóa phím tắt
-        document.onkeydown = function (e) {
-            // Vô hiệu hóa F12
-            if (e.keyCode == 123) {
-                return false;
-            }
-            // Vô hiệu hóa Ctrl+Shift+I
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-                return false;
-            }
-            // Vô hiệu hóa Ctrl+Shift+J
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-                return false;
-            }
-            // Vô hiệu hóa Ctrl+U
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-                return false;
-            }
-        };
+        
 
 
         // Your existing JavaScript code here
@@ -229,8 +197,7 @@
             passwordInput: document.getElementById('password'), modal: document.querySelector('.modal'),
             modalText: document.getElementById('modal-text'),
             modalConfirm: document.getElementById('modal-confirm'),
-            modalCloseButtons: document.querySelectorAll('.modal-close'),
-            rememberLoginCheckbox: document.getElementById('rememberLogin')
+            modalCloseButtons: document.querySelectorAll('.modal-close')
         };
 
         // Global variables
@@ -406,7 +373,6 @@
         const login = async () => {
             const username = elements.usernameInput.value;
             const password = elements.passwordInput.value;
-            const rememberLogin = elements.rememberLoginCheckbox.checked;
 
             showLoading();
 
@@ -421,11 +387,6 @@
                     const user = result[0];
                     if (user.password === password) {
                         currentUser = user;
-                        if (rememberLogin) {
-                            localStorage.setItem('username', username);
-                            localStorage.setItem('fullName', user['Họ và Tên']);
-                            localStorage.setItem('loginToken', 'someTokenValue');
-                        }
                         elements.loginForm.classList.add('hidden');
                         elements.checkInOutChoice.classList.remove('hidden');
                         showToast('Đăng nhập thành công!');
