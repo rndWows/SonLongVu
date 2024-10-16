@@ -60,6 +60,15 @@
                             </div>
                         </div>
 
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="rememberLogin" name="rememberLogin" type="checkbox"
+                                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                <label for="rememberLogin" class="ml-2 block text-sm text-gray-900">Ghi nhớ đăng
+                                    nhập</label>
+                            </div>
+                        </div>
+
                         <div>
                             <button id="loginBtn" type="button"
                                 class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -165,7 +174,7 @@
 
     <script>
 
-        
+
 
 
         // Your existing JavaScript code here
@@ -197,7 +206,9 @@
             passwordInput: document.getElementById('password'), modal: document.querySelector('.modal'),
             modalText: document.getElementById('modal-text'),
             modalConfirm: document.getElementById('modal-confirm'),
-            modalCloseButtons: document.querySelectorAll('.modal-close')
+            greetingMessage: document.createElement('div'),
+            modalCloseButtons: document.querySelectorAll('.modal-close'),
+            rememberLoginCheckbox: document.getElementById('rememberLogin')
         };
 
         // Global variables
@@ -373,6 +384,7 @@
         const login = async () => {
             const username = elements.usernameInput.value;
             const password = elements.passwordInput.value;
+            const rememberLogin = elements.rememberLoginCheckbox.checked;
 
             showLoading();
 
@@ -387,8 +399,19 @@
                     const user = result[0];
                     if (user.password === password) {
                         currentUser = user;
+                        if (rememberLogin) {
+                            localStorage.setItem('username', username);
+                            localStorage.setItem('fullName', user['Họ và Tên']);
+                            localStorage.setItem('loginToken', 'someTokenValue');
+                        }
                         elements.loginForm.classList.add('hidden');
                         elements.checkInOutChoice.classList.remove('hidden');
+
+                        // Thêm lời chào
+                        elements.greetingMessage.textContent = `Xin chào ${user['Họ và Tên']}!`;
+                        elements.greetingMessage.className = 'text-lg font-semibold text-gray-800 mb-4';
+                        elements.checkInOutChoice.insertBefore(elements.greetingMessage, elements.checkInOutChoice.firstChild);
+
                         showToast('Đăng nhập thành công!');
                     } else {
                         showToast('Tên đăng nhập không tồn tại!', 'error');
@@ -415,6 +438,11 @@
             elements.passwordInput.value = '';
             currentUser = null;
             stopCamera();
+
+            // Xóa lời chào
+            if (elements.greetingMessage.parentNode) {
+                elements.greetingMessage.parentNode.removeChild(elements.greetingMessage);
+            }
         };
 
         // Check-in/out functions
@@ -515,12 +543,21 @@
 
         const checkLoginStatus = () => {
             const savedUsername = localStorage.getItem('username');
+            const savedFullName = localStorage.getItem('fullName');
             const savedToken = localStorage.getItem('loginToken');
             if (savedUsername && savedToken) {
                 elements.usernameInput.value = savedUsername;
                 elements.loginForm.classList.add('hidden');
                 elements.checkInOutChoice.classList.remove('hidden');
                 updateButtonVisibility('initial');
+
+                // Thêm lời chào với tên đầy đủ
+                if (savedFullName) {
+                    currentUser = { 'Họ và Tên': savedFullName };
+                    elements.greetingMessage.textContent = `Xin chào ${savedFullName}!`;
+                    elements.greetingMessage.className = 'text-lg font-semibold text-gray-800 mb-4';
+                    elements.checkInOutChoice.insertBefore(elements.greetingMessage, elements.checkInOutChoice.firstChild);
+                }
             }
         };
 
