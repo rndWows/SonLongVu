@@ -352,14 +352,10 @@
             const location = await getLocation();
             const [latitude, longitude] = location.split(',');
             const currentTime = moment().tz("Asia/Ho_Chi_Minh");
-            const date = currentTime.format('YYYY-MM-DD');
-            const timeStr = currentTime.format('HH:mm:ss');
             const address = await getAddressFromCoordinates(latitude, longitude);
 
             const overlayInfo = `
-        Vị trí: ${latitude}, ${longitude}
         Địa chỉ: ${address}
-        Thời gian: ${date} ${timeStr}
     `;
 
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -467,40 +463,48 @@
                 };
 
                 const processCheckInOut = async () => {
-                    const imageWithLocation = await captureImage();
-                    const location = await getLocation();
+                    showLoading(); // Di chuyển showLoading() vào đây
+                    try {
+                        const imageWithLocation = await captureImage();
+                        const location = await getLocation();
 
-                    if (type === 'in') {
-                        if (existingRecord && existingRecord[0] && existingRecord[0].IN) {
-                            newData["LỊCH SỬ IN"] = `${existingRecord[0]["LỊCH SỬ IN"] || ""}\n${fullName} Đã check in lại vào ngày: (${date} lúc:   ${timeStr})`;
+                        if (type === 'in') {
+                            if (existingRecord && existingRecord[0] && existingRecord[0].IN) {
+                                newData["LỊCH SỬ IN"] = `${existingRecord[0]["LỊCH SỬ IN"] || ""}\n${fullName} Đã check in lại vào ngày: (${date} lúc:   ${timeStr})`;
+                            }
+                            newData["IN"] = timeStr;
+                            newData["HÌNH ẢNH IN"] = imageWithLocation;
+                            newData["ĐỊA CHỈ IN"] = location;
+                        } else if (type === 'out') {
+                            if (existingRecord[0].OUT) {
+                                newData["LỊCH SỬ OUT"] = `${existingRecord[0]["LỊCH SỬ OUT"] || ""}\n${fullName} Đã check out lại vào: (${date} lúc:  ${timeStr})`;
+                            } else {
+                                newData["LỊCH SỬ OUT"] = `${fullName} Đã check out vào: (${date} lúc:  ${timeStr})`;
+                            }
+                            newData["OUT"] = timeStr;
+                            newData["HÌNH ẢNH OUT"] = imageWithLocation;
+                            newData["ĐỊA CHỈ OUT"] = location;
                         }
-                        newData["IN"] = timeStr;
-                        newData["HÌNH ẢNH IN"] = imageWithLocation;
-                        newData["ĐỊA CHỈ IN"] = location;
-                    } else if (type === 'out') {
-                        if (existingRecord[0].OUT) {
-                            newData["LỊCH SỬ OUT"] = `${existingRecord[0]["LỊCH SỬ OUT"] || ""}\n${fullName} Đã check out lại vào: (${date} lúc:  ${timeStr})`;
+
+                        const action = existingRecord && existingRecord[0] ? 'Edit' : 'Add';
+                        const response = await apiRequest('LICH CV', action, { Rows: [newData] });
+
+                        if (response && response.Rows && response.Rows.length > 0) {
+                            const sentData = response.Rows[0];
+                            if (sentData['ID CV'] === idChamCong) {
+                                showToast(`Đã gửi thông tin check-${type} thành công!`);
+                            } else {
+                                console.warn('Dữ liệu gửi không khớp:', sentData);
+                                showToast(`Dữ liệu đã được gửi nhưng có thể không chính xác. Vui lòng kiểm tra lại.`, 'error');
+                            }
                         } else {
-                            newData["LỊCH SỬ OUT"] = `${fullName} Đã check out vào: (${date} lúc:  ${timeStr})`;
+                            throw new Error(`API request failed: ${JSON.stringify(response)}`);
                         }
-                        newData["OUT"] = timeStr;
-                        newData["HÌNH ẢNH OUT"] = imageWithLocation;
-                        newData["ĐỊA CHỈ OUT"] = location;
-                    }
-
-                    const action = existingRecord && existingRecord[0] ? 'Edit' : 'Add';
-                    const response = await apiRequest('LICH CV', action, { Rows: [newData] });
-
-                    if (response && response.Rows && response.Rows.length > 0) {
-                        const sentData = response.Rows[0];
-                        if (sentData['ID CV'] === idChamCong) {
-                            showToast(`Đã gửi thông tin check-${type} thành công!`);
-                        } else {
-                            console.warn('Dữ liệu gửi không khớp:', sentData);
-                            showToast(`Dữ liệu đã được gửi nhưng có thể không chính xác. Vui lòng kiểm tra lại.`, 'error');
-                        }
-                    } else {
-                        throw new Error(`API request failed: ${JSON.stringify(response)}`);
+                    } catch (error) {
+                        console.error('API request failed:', error);
+                        showToast(`Lỗi khi gửi dữ liệu: ${error.message || 'Không xác định'}. Vui lòng thử lại sau.`, 'error');
+                    } finally {
+                        hideLoading(); // Đảm bảo hideLoading() được gọi sau khi hoàn thành
                     }
                 };
 
