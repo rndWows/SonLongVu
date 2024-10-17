@@ -34,8 +34,8 @@
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <span id="employeeCode" class="text-lg justify-center font-bold text-gray-700"></span>
+        <main class="max-w-7xl mx-auto px-3 py-3 sm:px-6 lg:px-8">
+            <span id="employeeCode" class="text-lg font-bold text-gray-700 block text-center w-full "></span>
             <!-- Login Form -->
             <div id="loginForm" class=" sm:mx-auto sm:w-full sm:max-w-md">
                 <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
@@ -382,6 +382,13 @@
                 }, 'image/jpeg', 0.8);
             });
         };
+
+
+        // Thêm hàm mới để cập nhật hiển thị mã nhân viên
+        const updateEmployeeCodeDisplay = (employeeCode) => {
+            elements.employeeCode.textContent = `Mã NV: ${employeeCode}`;
+        };
+
         // Authentication functions
         const login = async () => {
             const username = elements.usernameInput.value;
@@ -410,7 +417,7 @@
                         elements.loginForm.classList.add('hidden');
                         elements.checkInOutChoice.classList.remove('hidden');
                         showToast(`Đăng nhập thành công! Xin chào, ${employeeCode}`);
-                        elements.employeeCode.textContent = `Mã NV: ${employeeCode}`;
+                        updateEmployeeCodeDisplay(employeeCode);
                     } else {
                         showToast('Tên đăng nhập hoặc mật khẩu không đúng!', 'error');
                     }
@@ -536,7 +543,7 @@
                 elements.checkInOutChoice.classList.remove('hidden');
                 updateButtonVisibility('initial');
                 currentUser = { 'Họ và Tên': savedEmployeeCode };
-                elements.employeeCode.textContent = `${savedEmployeeCode}`;
+                updateEmployeeCodeDisplay(savedEmployeeCode);
                 showToast(`Xin chào, ${savedEmployeeCode}!`);
             }
         };
