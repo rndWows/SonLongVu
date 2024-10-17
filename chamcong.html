@@ -273,13 +273,7 @@
             }
         };
 
-        const getLocation = async () => {
-            const hasLocationPermission = await checkPermission('geolocation');
-            if (!hasLocationPermission) {
-                console.warn('Không có quyền truy cập vị trí. Sử dụng vị trí mặc định.');
-                return DEFAULT_LOCATION;
-            }
-
+        const getLocation = () => {
             return new Promise((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(
                     position => resolve({
@@ -294,15 +288,27 @@
                 );
             });
         };
-
-        // Camera functions
-        const startCamera = async () => {
-            const hasCameraPermission = await checkPermission('camera');
-            if (!hasCameraPermission) {
-                showToast("Không có quyền truy cập camera. Sử dụng hình ảnh mặc định.", 'warning');
-                return false;
+        const requestPermissions = async () => {
+            try {
+                // Request camera permission
+                await navigator.mediaDevices.getUserMedia({ video: true });
+                console.log('Camera permission granted');
+            } catch (error) {
+                console.error('Error requesting camera permission:', error);
+                showToast('Vui lòng cấp quyền truy cập camera để sử dụng ứng dụng.', 'warning');
             }
 
+            try {
+                // Request geolocation permission
+                await navigator.geolocation.getCurrentPosition(() => { });
+                console.log('Geolocation permission granted');
+            } catch (error) {
+                console.error('Error requesting geolocation permission:', error);
+                showToast('Vui lòng cấp quyền truy cập vị trí để sử dụng ứng dụng.', 'warning');
+            }
+        };
+        // Camera functions
+        const startCamera = async () => {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
@@ -320,13 +326,7 @@
                 return true;
             } catch (err) {
                 console.error("Không thể truy cập camera:", err);
-                if (err.name === 'NotAllowedError') {
-                    showToast("Quyền truy cập camera bị từ chối. Vui lòng cấp quyền trong cài đặt.", 'error');
-                } else if (err.name === 'NotFoundError') {
-                    showToast("Không tìm thấy camera. Vui lòng kiểm tra thiết bị của bạn.", 'error');
-                } else {
-                    showToast("Lỗi khi truy cập camera: " + err.message, 'error');
-                }
+                showToast("Lỗi khi truy cập camera: " + err.message, 'error');
                 return false;
             }
         };
@@ -584,7 +584,8 @@
         });
 
         // Initialization
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await requestPermissions();
             checkLoginStatus();
             updateButtonVisibility('initial');
             startCamera();
