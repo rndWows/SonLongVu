@@ -81,10 +81,15 @@
                             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                             Check Out
                         </button>
+                        <button id="leaveRequestBtn"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                            Đơn xin nghỉ phép
+                        </button>
                         <button id="logoutBtn"
                             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                             Đăng xuất
                         </button>
+                        
                     </div>
                 </div>
             </div>
@@ -545,23 +550,28 @@
                 showToast(`Xin chào, ${savedEmployeeCode}!`);
             }
         };
-// Event listener for request permissions button
-document.getElementById('requestPermissionsBtn').addEventListener('click', requestPermissions);
-const checkPermissionsAndShowButton = async () => {
-    const hasCameraPermission = await checkPermission('camera');
-    const hasGeolocationPermission = await checkPermission('geolocation');
-    const permissionsBtn = document.getElementById('requestPermissionsBtn');
 
-    if (!hasCameraPermission || !hasGeolocationPermission) {
-        permissionsBtn.classList.remove('hidden');
-    } else {
-        permissionsBtn.classList.add('hidden');
-    }
-};
+        const handleLeaveRequest = () => {
+            window.location.href = 'https://rndwows.github.io/SonLongVu/donxinnghiphep.html';
+        };
 
-// Call this function on page load
-document.addEventListener('DOMContentLoaded', checkPermissionsAndShowButton);
-1
+        // Event listener for request permissions button
+        document.getElementById('requestPermissionsBtn').addEventListener('click', requestPermissions);
+        const checkPermissionsAndShowButton = async () => {
+            const hasCameraPermission = await checkPermission('camera');
+            const hasGeolocationPermission = await checkPermission('geolocation');
+            const permissionsBtn = document.getElementById('requestPermissionsBtn');
+
+            if (!hasCameraPermission || !hasGeolocationPermission) {
+                permissionsBtn.classList.remove('hidden');
+            } else {
+                permissionsBtn.classList.add('hidden');
+            }
+        };
+
+        // Call this function on page load
+        document.addEventListener('DOMContentLoaded', checkPermissionsAndShowButton);
+        1
         // Event listeners
         elements.switchCameraBtn.addEventListener('click', switchCamera);
         elements.captureBtn.addEventListener('click', () => handleCheckInOut('in'));
@@ -586,6 +596,8 @@ document.addEventListener('DOMContentLoaded', checkPermissionsAndShowButton);
         elements.modalCloseButtons.forEach(button => {
             button.addEventListener('click', closeModal);
         });
+        elements.leaveRequestBtn = document.getElementById('leaveRequestBtn');
+        elements.leaveRequestBtn.addEventListener('click', handleLeaveRequest);
 
         // Initialization
         document.addEventListener('DOMContentLoaded', () => {
