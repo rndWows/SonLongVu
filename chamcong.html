@@ -316,16 +316,26 @@
                 };
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 elements.camera.srcObject = stream;
+                await elements.camera.play();
                 return true;
             } catch (err) {
                 console.error("Không thể truy cập camera:", err);
-                showToast("Không thể truy cập camera. Sử dụng hình ảnh mặc định.", 'warning');
+                if (err.name === 'NotAllowedError') {
+                    showToast("Quyền truy cập camera bị từ chối. Vui lòng cấp quyền trong cài đặt.", 'error');
+                } else if (err.name === 'NotFoundError') {
+                    showToast("Không tìm thấy camera. Vui lòng kiểm tra thiết bị của bạn.", 'error');
+                } else {
+                    showToast("Lỗi khi truy cập camera: " + err.message, 'error');
+                }
                 return false;
             }
         };
 
         const switchCamera = async () => {
             facingMode = facingMode === "user" ? "environment" : "user";
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
             await startCamera();
         };
 
