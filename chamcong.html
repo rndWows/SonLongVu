@@ -309,6 +309,12 @@
         };
         // Camera functions
         const startCamera = async () => {
+            const hasCameraPermission = await checkPermission('camera');
+            if (!hasCameraPermission) {
+                showToast("Không có quyền truy cập camera. Vui lòng cấp quyền và thử lại.", 'error');
+                return false;
+            }
+
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
@@ -322,29 +328,20 @@
                 };
                 stream = await navigator.mediaDevices.getUserMedia(constraints);
                 elements.camera.srcObject = stream;
-                await elements.camera.play();
                 return true;
             } catch (err) {
                 console.error("Không thể truy cập camera:", err);
-                showToast("Lỗi khi truy cập camera: " + err.message, 'error');
+                showToast("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập và thử lại.", 'error');
                 return false;
             }
         };
 
         const switchCamera = async () => {
             facingMode = facingMode === "user" ? "environment" : "user";
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
             await startCamera();
         };
 
         const captureImage = async () => {
-            if (!stream) {
-                console.warn("Camera không khả dụng, sử dụng hình ảnh mặc định.");
-                return DEFAULT_IMAGE;
-            }
-
             const canvas = document.createElement('canvas');
             canvas.width = elements.camera.videoWidth;
             canvas.height = elements.camera.videoHeight;
@@ -352,23 +349,15 @@
 
             ctx.drawImage(elements.camera, 0, 0);
 
-            let location;
-            try {
-                location = await getLocation();
-            } catch (error) {
-                console.warn("Không thể lấy vị trí:", error);
-                location = DEFAULT_LOCATION;
-                showToast("Không thể lấy vị trí. Sử dụng vị trí mặc định.", 'warning');
-            }
-
+            const location = await getLocation();
             const currentTime = moment().tz("Asia/Ho_Chi_Minh");
             const date = currentTime.format('YYYY-MM-DD');
             const timeStr = currentTime.format('HH:mm:ss');
 
             const overlayInfo = `
-            Vị trí: ${location.latitude}, ${location.longitude}
-            Thời gian: ${date} ${timeStr}
-        `;
+        Vị trí: ${location.latitude}, ${location.longitude}
+        Thời gian: ${date} ${timeStr}
+    `;
 
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
             ctx.fillRect(10, 10, canvas.width - 20, 80);
@@ -381,14 +370,9 @@
 
             return new Promise((resolve) => {
                 canvas.toBlob((blob) => {
-                    if (blob) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result);
-                        reader.readAsDataURL(blob);
-                    } else {
-                        console.warn("Không thể tạo blob từ canvas, sử dụng hình ảnh mặc định.");
-                        resolve(DEFAULT_IMAGE);
-                    }
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
                 }, 'image/jpeg', 0.8);
             });
         };
@@ -584,11 +568,11 @@
         });
 
         // Initialization
-        document.addEventListener('DOMContentLoaded', async () => {
-            await requestPermissions();
+        document.addEventListener('DOMContentLoaded', () => {
             checkLoginStatus();
             updateButtonVisibility('initial');
             startCamera();
+
         });
     </script>
 </body>
