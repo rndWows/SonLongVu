@@ -1,368 +1,600 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="h-full bg-gray-100">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chụp ảnh với Thông tin</title>
+    <title>Ứng dụng Chấm công</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f9;
+        .modal {
+            transition: opacity 0.25s ease;
         }
 
-        #camera, #canvas, #photo {
-            width: 100%;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-        }
-
-        .button-container button {
-            flex: 1;
-            padding: 10px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .button-container button i {
-            margin-right: 8px;
-        }
-
-        #switchCameraBtn {
-            background-color: #4CAF50;
-        }
-
-        #captureBtn, #captureOutBtn {
-            background-color: #2196F3;
-        }
-
-        #backBtn {
-            background-color: #f44336;
-        }
-
-        #switchCameraBtn:hover {
-            background-color: #45a049;
-        }
-
-        #captureBtn:hover, #captureOutBtn:hover {
-            background-color: #1e88e5;
-        }
-
-        #backBtn:hover {
-            background-color: #e53935;
-        }
-
-        .alert, .loading, .fullscreen-message {
-            padding: 15px;
-            color: white;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            text-align: center;
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background-color: #4CAF50;
-            font-size: 18px;
-            z-index: 9999;
-        }
-
-        .loading {
-            background-color: #ffa500;
-        }
-
-        .fullscreen-message {
-            display: block;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .button-container button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: white;
-            color: black;
-            cursor: pointer;
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-
-        .button-container button:hover {
-            background-color: #e0e0e0;
-            border-color: #999;
-        }
-
-        .button-container button:focus {
-            outline: none;
-            border-color: #4CAF50;
-            background-color: #f4f4f4;
+        body.modal-active {
+            overflow-x: hidden;
+            overflow-y: visible !important;
         }
     </style>
 </head>
 
-<body>
-    <h1>Chụp ảnh với Thông tin</h1>
-    <div id="loadingBox" class="loading">Đang gửi dữ liệu...</div>
-    <div id="alertBox" class="alert"></div>
-    
-    <div class="button-container">
-        <button id="checkInBtn">Check In</button>
-        <button id="checkOutBtn">Check Out</button>
+<body class="h-full bg-gray-100">
+    <div class="min-h-full">
+        <header class="bg-white shadow">
+            <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex items-center">
+                <img src="https://rndwows.github.io/SonLongVu/cc6f2bd273eecab093ff.jpg" alt="Long Vu Painting"
+                    class="w-16 h-16 mr-4">
+                <h1 class="text-4xl sm:text-3xl font-bold tracking-tight text-gray-900">Chấm công</h1>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-3 py-3 sm:px-6 lg:px-8">
+            <span id="employeeCode" class="text-lg font-bold text-gray-700 block text-center w-full "></span>
+            <!-- Login Form -->
+            <div id="loginForm" class=" sm:mx-auto sm:w-full sm:max-w-md">
+                <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    <form class="space-y-6" action="#" method="POST">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700">Tên đăng nhập</label>
+                            <input id="username" name="username" type="text" autocomplete="username" required
+                                class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700">Mật khẩu</label>
+                            <input id="password" name="password" type="password" autocomplete="current-password"
+                                required
+                                class="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                        <div class="flex items-center">
+                            <input id="rememberLogin" name="rememberLogin" type="checkbox"
+                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="rememberLogin" class="ml-2 block text-sm text-gray-900">Ghi nhớ đăng
+                                nhập</label>
+                        </div>
+                        <button id="loginBtn" type="button"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Đăng nhập
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Check In/Out Choice -->
+            <div id="checkInOutChoice" class="hidden  sm:mx-auto sm:w-full sm:max-w-md">
+                <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    <div class="space-y-4">
+                        <button id="checkInBtn"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Check In
+                        </button>
+                        <button id="checkOutBtn"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            Check Out
+                        </button>
+                        <button id="logoutBtn"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            Đăng xuất
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Camera Container -->
+            <div id="cameraContainer" class="hidden  sm:mx-auto sm:w-full sm:max-w-md">
+                <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    <div class="space-y-6">
+                        <div class="relative">
+                            <video id="camera" class="w-full rounded-lg shadow-lg" autoplay playsinline></video>
+                            <div id="cameraOverlay"
+                                class="absolute top-2 left-2 bg-black bg-opacity-50 text-white p-2 rounded text-xs">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button id="switchCameraBtn"
+                                class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                <i class="fas fa-sync-alt mr-2"></i>Đổi Camera
+                            </button>
+                            <button id="captureBtn"
+                                class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <i class="fas fa-camera mr-2"></i>Chụp ảnh vào
+                            </button>
+
+                            <button id="captureOutBtn"
+                                class="hidden w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <i class="fas fa-camera mr-2"></i>Chụp ảnh ra
+                            </button>
+                        </div>
+                        <button id="backBtn"
+                            class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            <i class="fas fa-arrow-left mr-2"></i>Quay lại
+                        </button>
+                        <img id="photo" class="w-full rounded-lg shadow-lg hidden"
+                            alt="Ảnh đã chụp sẽ xuất hiện ở đây.">
+                        <div id="infoDisplay" class="text-sm text-gray-600"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <div id="cameraContainer" style="display:none;">
-        <video id="camera" autoplay playsinline></video>
-        <div class="button-container">
-            <button id="switchCameraBtn"><i class="fas fa-sync-alt"></i>Đổi Camera</button>
-            <button id="captureBtn"><i class="fas fa-camera"></i>Chụp ảnh vào</button>
-            <button id="captureOutBtn" style="display: none;"><i class="fas fa-camera"></i>Chụp ảnh ra</button>
-            <button id="backBtn"><i class="fas fa-arrow-left"></i>Quay lại</button>
+    <!-- Modal -->
+    <div id="confirmModal"
+        class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center">
+        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p class="text-xl font-bold">Xác nhận ghi đè</p>
+                    <div class="modal-close cursor-pointer z-50">
+                        <svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                            viewBox="0 0 18 18">
+                            <path
+                                d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+                <p id="modal-text" class="my-4"></p>
+                <div class="flex justify-end pt-2">
+                    <button
+                        class="modal-close px-4 bg-transparent p-3 rounded-lg text-indigo-500 hover:bg-gray-100 hover:text-indigo-400 mr-2">Hủy</button>
+                    <button id="modal-confirm"
+                        class="px-4 bg-indigo-500 p-3 rounded-lg text-white hover:bg-indigo-400">Xác nhận</button>
+                </div>
+            </div>
         </div>
-        <canvas id="canvas" style="display:none;"></canvas>
-        <img id="photo" alt="Ảnh đã chụp sẽ xuất hiện ở đây.">
-        <div id="infoDisplay"></div>
+    </div>
+
+    <div id="loadingBox" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50 hidden">
+        <div class="bg-white p-5 rounded-lg shadow-lg">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
+            <p class="mt-3 text-gray-700">Đang gửi dữ liệu...</p>
+        </div>
     </div>
 
     <script>
-        const appId = '10aadcbe-4e60-4f7d-870e-cfdb7a5707c8';
-        const accessKey = 'V2-wCBT2-znuFG-8ZNLo-zphe2-ScGnE-rOoyW-WWJPF-Oa4h1';
-        const region = 'www';
+        // Constants
+        const APP_ID = '10aadcbe-4e60-4f7d-870e-cfdb7a5707c8';
+        const ACCESS_KEY = 'V2-wCBT2-znuFG-8ZNLo-zphe2-ScGnE-rOoyW-WWJPF-Oa4h1';
+        const REGION = 'www';
+        const API_URL = `https://${REGION}.appsheet.com/api/v2/apps/${APP_ID}/tables`;
 
-        const camera = document.getElementById('camera');
-        const captureBtn = document.getElementById('captureBtn');
-        const captureOutBtn = document.getElementById('captureOutBtn');
-        const switchCameraBtn = document.getElementById('switchCameraBtn');
-        const backBtn = document.getElementById('backBtn');
-        const cameraContainer = document.getElementById('cameraContainer');
-        const checkInOutChoice = document.getElementById('checkInOutChoice');
-        const photo = document.getElementById('photo');
-        const infoDisplay = document.getElementById('infoDisplay');
-        const alertBox = document.getElementById('alertBox');
-        const loadingBox = document.getElementById('loadingBox');
+        // DOM Elements
+        const elements = {
+            camera: document.getElementById('camera'),
+            captureBtn: document.getElementById('captureBtn'),
+            captureOutBtn: document.getElementById('captureOutBtn'),
+            switchCameraBtn: document.getElementById('switchCameraBtn'),
+            backBtn: document.getElementById('backBtn'),
+            cameraContainer: document.getElementById('cameraContainer'),
+            checkInOutChoice: document.getElementById('checkInOutChoice'),
+            photo: document.getElementById('photo'),
+            infoDisplay: document.getElementById('infoDisplay'),
+            loadingBox: document.getElementById('loadingBox'),
+            checkInBtn: document.getElementById('checkInBtn'),
+            checkOutBtn: document.getElementById('checkOutBtn'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            loginBtn: document.getElementById('loginBtn'),
+            loginForm: document.getElementById('loginForm'),
+            usernameInput: document.getElementById('username'),
+            passwordInput: document.getElementById('password'),
+            modal: document.querySelector('.modal'),
+            modalText: document.getElementById('modal-text'),
+            modalConfirm: document.getElementById('modal-confirm'),
+            modalCloseButtons: document.querySelectorAll('.modal-close'),
+            rememberLoginCheckbox: document.getElementById('rememberLogin'),
+            employeeCode: document.getElementById('employeeCode')
+        };
 
+        // Global variables
         let stream;
-        let facingMode = "user";
+        let facingMode = "environment";
+        let currentUser = null;
+        const DEFAULT_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=='; // 1x1 transparent PNG
+        const DEFAULT_LOCATION = { latitude: 0, longitude: 0 };
+        // Utility functions
+        const showLoading = () => elements.loadingBox.classList.remove('hidden');
+        const hideLoading = () => elements.loadingBox.classList.add('hidden');
 
-        function showAlert(message) {
-            alertBox.textContent = message;
-            alertBox.style.display = "block";
-            setTimeout(() => { alertBox.style.display = "none"; }, 3000);
-        }
+        const showToast = (message, type = 'info') => {
+            Toastify({
+                text: message,
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "center",
+                backgroundColor: type === 'error' ? "#ff0000" : "#4CAF50",
+            }).showToast();
+        };
 
-        function showLoading() {
-            loadingBox.style.display = "block";
-        }
+        const openModal = (message, onConfirm) => {
+            elements.modalText.textContent = message;
+            elements.modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+            elements.modalConfirm.onclick = () => {
+                closeModal();
+                onConfirm();
+            };
+        };
 
-        function hideLoading() {
-            loadingBox.style.display = "none";
-        }
+        const closeModal = () => {
+            elements.modal.classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('modal-active');
+        };
 
-        function showFullScreenMessage(message) {
-            alertBox.textContent = message;
-            alertBox.classList.add("fullscreen-message");
-            setTimeout(() => {
-                alertBox.classList.remove("fullscreen-message");
-                alertBox.style.display = "none";
-            }, 3000);
-        }
+        // API functions
+        const apiRequest = async (tableName, action, data, select = {}) => {
+            try {
+                const response = await fetch(`${API_URL}/${tableName}/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': ACCESS_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: action,
+                        Properties: select,
+                        ...data
+                    })
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+                return await response.json();
+            } catch (error) {
+                console.error('API request failed:', error);
+                throw error;
+            }
+        };
 
-        async function startCamera() {
+        const checkExistingRecord = async (idChamCong) => {
+            try {
+                return await apiRequest('LICH CV', 'Find', {}, {
+                    Selector: `Filter(LICH CV,[ID CV]="${idChamCong}")`
+                });
+            } catch (error) {
+                console.error('Error checking existing record:', error);
+                throw error;
+            }
+        };
+
+        // Location and permission functions
+        const checkPermission = async (permissionName) => {
+            try {
+                const result = await navigator.permissions.query({ name: permissionName });
+                if (result.state === 'granted') {
+                    return true;
+                } else if (result.state === 'prompt') {
+                    showToast(`Vui lòng cấp quyền ${permissionName === 'camera' ? 'truy cập camera' : 'truy cập vị trí'} để tiếp tục.`, 'warning');
+                    return false;
+                } else {
+                    showToast(`Quyền ${permissionName === 'camera' ? 'truy cập camera' : 'truy cập vị trí'} bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error(`Lỗi khi kiểm tra quyền ${permissionName}:`, error);
+                return false;
+            }
+        };
+
+        const getLocation = async () => {
+            const hasLocationPermission = await checkPermission('geolocation');
+            if (!hasLocationPermission) {
+                showToast('Vui lòng cấp quyền truy cập vị trí để tiếp tục.', 'warning');
+                return DEFAULT_LOCATION;
+            }
+
+            return new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    position => resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    }),
+                    error => {
+                        console.warn('Lỗi khi lấy vị trí:', error);
+                        showToast('Không thể lấy vị trí. Vui lòng kiểm tra cài đặt vị trí của bạn.', 'error');
+                        resolve(DEFAULT_LOCATION);
+                    },
+                    { timeout: 10000, maximumAge: 0 }
+                );
+            });
+        };
+
+        // Camera functions
+        const startCamera = async () => {
+            const hasCameraPermission = await checkPermission('camera');
+            if (!hasCameraPermission) {
+                showToast("Vui lòng cấp quyền truy cập camera để tiếp tục.", 'warning');
+                return false;
+            }
+
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
             try {
-                stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode }
-                });
-                camera.srcObject = stream;
+                const constraints = {
+                    video: {
+                        facingMode: facingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                elements.camera.srcObject = stream;
+                return true;
             } catch (err) {
-                console.error("Không thể truy cập camera: ", err);
-                showAlert("Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập.");
+                console.error("Không thể truy cập camera:", err);
+                showToast("Không thể truy cập camera. Vui lòng kiểm tra cài đặt camera của bạn.", 'error');
+                return false;
             }
-        }
+        };
 
-        startCamera();
-
-        switchCameraBtn.addEventListener('click', function () {
+        const switchCamera = async () => {
             facingMode = facingMode === "user" ? "environment" : "user";
-            startCamera();
-        });
+            await startCamera();
+        };
 
-        captureBtn.addEventListener('click', function () {
-            getLocationAndTime('in');
-        });
-
-        captureOutBtn.addEventListener('click', function () {
-            getLocationAndTime('out');
-        });
-
-        backBtn.addEventListener('click', function () {
-            cameraContainer.style.display = 'none';
-            checkInOutChoice.style.display = 'block';
-        });
-
-        function getLocationAndTime(type) {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(function (position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    const currentTime = moment().tz("Asia/Ho_Chi_Minh").format('YYYY-MM-DD HH:mm:ss');
-                    
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const address = data.display_name;
-                            captureAndAddInfo(lat, lon, address, currentTime, type);
-                        })
-                        .catch(error => {
-                            console.error('Lỗi khi lấy địa chỉ:', error);
-                            captureAndAddInfo(lat, lon, "Không thể lấy địa chỉ", currentTime, type);
-                        });
-                }, function (error) {
-                    console.error("Lỗi khi lấy vị trí: ", error);
-                    showAlert("Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập.");
-                });
-            } else {
-                showAlert("Trình duyệt của bạn không hỗ trợ geolocation.");
+        const captureImage = async () => {
+            if (!stream) {
+                console.warn("Camera không khả dụng, sử dụng hình ảnh mặc định.");
+                return DEFAULT_IMAGE;
             }
-        }
 
-        function captureAndAddInfo(lat, lon, address, time, type) {
+            const canvas = document.createElement('canvas');
+            canvas.width = elements.camera.videoWidth;
+            canvas.height = elements.camera.videoHeight;
             const ctx = canvas.getContext('2d');
-            canvas.width = camera.videoWidth;
-            canvas.height = camera.videoHeight;
-            ctx.drawImage(camera, 0, 0);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillRect(0, canvas.height - 80, canvas.width, 80);
-            ctx.fillStyle = 'white';
-            ctx.font = '12px Arial';
-            ctx.fillText(`Vị trí: ${lat.toFixed(6)}, ${lon.toFixed(6)}`, 10, canvas.height - 60);
-            const words = address.split(' ');
-            let line1 = '';
-            let line2 = '';
-            for (let i = 0; i < words.length; i++) {
-                if (ctx.measureText(line1 + words[i] + ' ').width < canvas.width - 20) {
-                    line1 += words[i] + ' ';
-                } else {
-                    line2 = words.slice(i).join(' ');
-                    break;
-                }
+
+            ctx.drawImage(elements.camera, 0, 0);
+
+            let location;
+            try {
+                location = await getLocation();
+            } catch (error) {
+                console.warn("Không thể lấy vị trí:", error);
+                location = DEFAULT_LOCATION;
+                showToast("Không thể lấy vị trí. Sử dụng vị trí mặc định.", 'warning');
             }
-            ctx.fillText(`Địa chỉ: ${line1}`, 10, canvas.height - 40);
-            ctx.fillText(line2, 10, canvas.height - 25);
-            ctx.fillText(`Thời gian: ${time}`, 10, canvas.height - 10);
-            
-            const imageDataUrl = canvas.toDataURL('image/jpeg');
-            photo.src = imageDataUrl;
 
-            infoDisplay.innerHTML = `
-                <strong>Vị trí:</strong> ${lat}, ${lon}<br>
-                <strong>Địa chỉ:</strong> ${address}<br>
-                <strong>Thời gian:</strong> ${time}
-            `;
+            const currentTime = moment().tz("Asia/Ho_Chi_Minh");
+            const date = currentTime.format('YYYY-MM-DD');
+            const timeStr = currentTime.format('HH:mm:ss');
 
-            sendToAppSheet(lat, lon, address, time, imageDataUrl, type);
-        }
+            const overlayInfo = `
+            Vị trí: ${location.latitude}, ${location.longitude}
+            Thời gian: ${date} ${timeStr}
+        `;
 
-        async function sendToAppSheet(lat, lon, address, time, imageDataUrl, type) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(10, 10, canvas.width - 20, 80);
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Arial';
+
+            overlayInfo.split('\n').forEach((line, index) => {
+                ctx.fillText(line.trim(), 20, 30 + (index * 20));
+            });
+
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    } else {
+                        console.warn("Không thể tạo blob từ canvas, sử dụng hình ảnh mặc định.");
+                        resolve(DEFAULT_IMAGE);
+                    }
+                }, 'image/jpeg', 0.8);
+            });
+        };
+
+
+        // Thêm hàm mới để cập nhật hiển thị mã nhân viên
+        const updateEmployeeCodeDisplay = (employeeCode) => {
+            elements.employeeCode.textContent = `Mã NV: ${employeeCode}`;
+        };
+
+        // Authentication functions
+        const login = async () => {
+            const username = elements.usernameInput.value;
+            const password = elements.passwordInput.value;
+            const rememberLogin = elements.rememberLoginCheckbox.checked;
+
             showLoading();
-            const [date, timeStr] = time.split(' ');
-            const ungVienData = {
-                "THỜI GIAN": timeStr,
-                "MÃ NHÂN VIÊN": "NV001",
-                "HỌ VÀ TÊN": "Nguyễn Văn A",
-                "GHI CHÚ": type === 'in' ? "Check in" : "Check out",
-                "IN TT": type === 'in' ? timeStr : null,
-                "OUT TT": type === 'out' ? timeStr : null,
-                "Hình ảnh vào": type === 'in' ? imageDataUrl : null,
-                "Hình ảnh ra": type === 'out' ? imageDataUrl : null,
-                "Địa chỉ vào": type === 'in' ? `${lat},${lon}` : null,
-                "Địa chỉ ra": type === 'out' ? `${lat},${lon}` : null,
-                "Trạng thái": type === 'in' ? "Đã vào" : "Đã ra",
-            };
 
             try {
-                const duAnResponse = await apiRequest('LICH CV', 'Add', { Rows: [ungVienData] });
-                showFullScreenMessage(`Đã gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'} thành công!`);
-                setTimeout(() => {
-                    location.reload();
-                }, 3000);
+                const result = await apiRequest('DSNV', 'Find', {
+                    Properties: {
+                        Selector: `Filter(DSNV, and( [username] = "${username}" , [password] = "${password}"))`
+                    }
+                });
+
+                if (result && Array.isArray(result) && result.length === 1) {
+                    const user = result[0];
+                    if (user.password === password) {
+                        currentUser = user;
+                        const employeeCode = user['Họ và Tên'];
+                        if (rememberLogin) {
+                            localStorage.setItem('username', username);
+                            localStorage.setItem('employeeCode', employeeCode);
+                            localStorage.setItem('loginToken', 'someTokenValue');
+                        }
+                        elements.loginForm.classList.add('hidden');
+                        elements.checkInOutChoice.classList.remove('hidden');
+                        showToast(`Đăng nhập thành công! Xin chào, ${employeeCode}`);
+                        updateEmployeeCodeDisplay(employeeCode);
+                    } else {
+                        showToast('Tên đăng nhập hoặc mật khẩu không đúng!', 'error');
+                    }
+                } else {
+                    showToast('Tên đăng nhập hoặc mật khẩu không đúng!', 'error');
+                }
             } catch (error) {
-                console.error('Error sending data:', error);
-                showFullScreenMessage(`Lỗi khi gửi thông tin ${type === 'in' ? 'check-in' : 'check-out'}. Vui lòng thử lại.`);
+                console.error('Lỗi đăng nhập:', error);
+                showToast(`Lỗi đăng nhập: ${error.message || 'Không xác định'}. Vui lòng thử lại sau.`, 'error');
             } finally {
                 hideLoading();
             }
-        }
+        };
 
-        function apiRequest(tableName, action, data) {
-            const apiUrl = `https://${region}.appsheet.com/api/v2/apps/${appId}/tables/${tableName}/Action`;
-            return $.ajax({
-                url: apiUrl,
-                method: 'POST',
-                headers: {
-                    'ApplicationAccessKey': accessKey,
-                    'Content-Type': 'application/json'
-                },
-                data: JSON.stringify({
-                    Action: action,
-                    Properties: {
-                        Locale: 'vi-VN',
-                        Timezone: 'Asia/Ho_Chi_Minh'
-                    },
-                    ...data
-                })
-            }).then(response => {
-                return response;
-            }).catch(error => {
-                throw error;
-            });
-        }
+        const logout = () => {
+            localStorage.removeItem('username');
+            localStorage.removeItem('employeeCode');
+            localStorage.removeItem('loginToken');
+            elements.checkInOutChoice.classList.add('hidden');
+            elements.cameraContainer.classList.add('hidden');
+            elements.loginForm.classList.remove('hidden');
+            elements.usernameInput.value = '';
+            elements.passwordInput.value = '';
+            currentUser = null;
+        };
 
-        $(document).ready(function() {
-            $('#checkInOutChoice').show();
+        // Check-in/out functions
+        const handleCheckInOut = async (type) => {
+            showLoading();
+            const fullName = currentUser['Họ và Tên'];
+            const currentTime = moment().tz("Asia/Ho_Chi_Minh");
+            const date = currentTime.format('DD/MM/YYYY');
+            const timeStr = currentTime.format('HH:mm:ss');
+            const idChamCong = `${fullName}${date}`;
+            const datee = currentTime.format('YYYY-MM-DD');
+
+            try {
+                const existingRecord = await checkExistingRecord(idChamCong);
+
+                let newData = {
+                    "ID CV": idChamCong,
+                    "NGÀY": datee,
+                    "Họ và Tên": fullName,
+                    "GHI CHÚ": `Check ${type} qua API`
+                };
+
+                const processCheckInOut = async () => {
+                    showLoading();
+                    try {
+                        const hasCameraPermission = await checkPermission('camera');
+                        const hasLocationPermission = await checkPermission('geolocation');
+
+                        if (!hasCameraPermission || !hasLocationPermission) {
+                            showToast("Vui lòng cấp quyền truy cập camera và vị trí để tiếp tục.", 'warning');
+                            return;
+                        }
+
+                        const imageWithLocation = await captureImage();
+                        const location = await getLocation();
+
+                        if (type === 'in') {
+                            if (existingRecord && existingRecord[0] && existingRecord[0].IN) {
+                                newData["LỊCH SỬ IN"] = `${existingRecord[0]["LỊCH SỬ IN"] || ""}\n${fullName} Đã check in lại vào ngày: (${date} lúc: ${timeStr})`;
+                            }
+                            newData["IN"] = timeStr;
+                            newData["HÌNH ẢNH IN"] = imageWithLocation;
+                            newData["ĐỊA CHỈ IN"] = `${location.latitude},${location.longitude}`;
+                        } else if (type === 'out') {
+                            if (existingRecord && existingRecord[0] && existingRecord[0].OUT) {
+                                newData["LỊCH SỬ OUT"] = `${existingRecord[0]["LỊCH SỬ OUT"] || ""}\n${fullName} Đã check out lại vào: (${date} lúc: ${timeStr})`;
+                            } else {
+                                newData["LỊCH SỬ OUT"] = `${fullName} Đã check out vào: (${date} lúc: ${timeStr})`;
+                            }
+                            newData["OUT"] = timeStr;
+                            newData["HÌNH ẢNH OUT"] = imageWithLocation;
+                            newData["ĐỊA CHỈ OUT"] = `${location.latitude},${location.longitude}`;
+                        }
+
+                        const action = existingRecord && existingRecord[0] ? 'Edit' : 'Add';
+                        const response = await apiRequest('LICH CV', action, { Rows: [newData] });
+
+                        if (response && response.Rows && response.Rows.length > 0) {
+                            const sentData = response.Rows[0];
+                            if (sentData['ID CV'] === idChamCong) {
+                                showToast(`Đã gửi thông tin check-${type} thành công!`);
+                            } else {
+                                console.warn('Dữ liệu gửi không khớp:', sentData);
+                                showToast(`Dữ liệu đã được gửi nhưng có thể không chính xác. Vui lòng kiểm tra lại.`, 'warning');
+                            }
+                        } else {
+                            throw new Error(`API request failed: ${JSON.stringify(response)}`);
+                        }
+                    } catch (error) {
+                        console.error('API request failed:', error);
+                        showToast(`Lỗi khi gửi dữ liệu: ${error.message || 'Không xác định'}. Vui lòng thử lại sau.`, 'error');
+                    } finally {
+                        hideLoading(); // Đảm bảo hideLoading() được gọi sau khi hoàn thành
+                    }
+                };
+
+                if (type === 'in' && existingRecord && existingRecord[0] && existingRecord[0].IN) {
+                    openModal(`Bạn đã check-in lúc ${existingRecord[0].IN}. Bạn có muốn check-in lại không?`, processCheckInOut);
+                } else if (type === 'out' && existingRecord && existingRecord[0] && existingRecord[0].OUT) {
+                    openModal(`Bạn đã check-out lúc ${existingRecord[0].OUT}. Bạn có muốn check-out lại không?`, processCheckInOut);
+                } else {
+                    await processCheckInOut();
+                }
+            } catch (error) {
+                console.error('API request failed:', error);
+                showToast(`Lỗi khi gửi dữ liệu: ${error.message || 'Không xác định'}. Vui lòng thử lại sau.`, 'error');
+            } finally {
+                hideLoading();
+            }
+        };
+
+        const updateButtonVisibility = (state) => {
+            elements.checkInBtn.classList.toggle('hidden', state !== 'initial');
+            elements.checkOutBtn.classList.toggle('hidden', state !== 'initial');
+            elements.logoutBtn.classList.remove('hidden');
+            elements.captureBtn.classList.toggle('hidden', state !== 'in');
+            elements.captureOutBtn.classList.toggle('hidden', state !== 'out');
+        };
+
+        const checkLoginStatus = () => {
+            const savedUsername = localStorage.getItem('username');
+            const savedEmployeeCode = localStorage.getItem('employeeCode');
+            const savedToken = localStorage.getItem('loginToken');
+            if (savedUsername && savedEmployeeCode && savedToken) {
+                elements.usernameInput.value = savedUsername;
+                elements.loginForm.classList.add('hidden');
+                elements.checkInOutChoice.classList.remove('hidden');
+                updateButtonVisibility('initial');
+                currentUser = { 'Họ và Tên': savedEmployeeCode };
+                updateEmployeeCodeDisplay(savedEmployeeCode);
+                showToast(`Xin chào, ${savedEmployeeCode}!`);
+            }
+        };
+
+        // Event listeners
+        elements.switchCameraBtn.addEventListener('click', switchCamera);
+        elements.captureBtn.addEventListener('click', () => handleCheckInOut('in'));
+        elements.captureOutBtn.addEventListener('click', () => handleCheckInOut('out'));
+        elements.backBtn.addEventListener('click', () => {
+            elements.cameraContainer.classList.add('hidden');
+            elements.checkInOutChoice.classList.remove('hidden');
+            updateButtonVisibility('initial');
+        });
+        elements.checkInBtn.addEventListener('click', () => {
+            elements.checkInOutChoice.classList.add('hidden');
+            elements.cameraContainer.classList.remove('hidden');
+            updateButtonVisibility('in');
+        });
+        elements.checkOutBtn.addEventListener('click', () => {
+            elements.checkInOutChoice.classList.add('hidden');
+            elements.cameraContainer.classList.remove('hidden');
+            updateButtonVisibility('out');
+        });
+        elements.logoutBtn.addEventListener('click', logout);
+        elements.loginBtn.addEventListener('click', login);
+        elements.modalCloseButtons.forEach(button => {
+            button.addEventListener('click', closeModal);
         });
 
-        $('#checkInBtn').on('click', function () {
-            $('#checkInOutChoice').hide();
-            $('#cameraContainer').show();
-            $('#captureOutBtn').hide();
-            $('#captureBtn').show();
-        });
-
-        $('#checkOutBtn').on('click', function () {
-            $('#checkInOutChoice').hide();
-            $('#cameraContainer').show();
-            $('#captureBtn').hide();
-            $('#captureOutBtn').show();
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+            updateButtonVisibility('initial');
+            startCamera();
         });
     </script>
 </body>
