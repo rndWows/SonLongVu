@@ -141,8 +141,11 @@
     <div class="container mx-auto px-4 py-8 no-print">
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800">Bảng Lương Nhân Viên</h1>
-                <button onclick="exportTableToExcel()" class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                <h1 class="text-2xl font-bold text-gray-800">
+                    Bảng Lương Nhân Viên <span id="tableName" class="text-blue-600"></span>
+                </h1>
+                <button onclick="exportTableToExcel()"
+                    class="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200">
                     <i class="fas fa-file-excel"></i>
                     Xuất Excel
                 </button>
@@ -162,24 +165,32 @@
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Nhà ở</th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Khác</th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tổng thu nhập</th>
-                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tiền cơm tăng ca/hỗ trợ khác</th>
+                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tiền cơm tăng ca/hỗ trợ
+                                khác</th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Ngày công chuẩn</th>
-                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Ngày công đi làm thực tế</th>
-                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Số giờ tăng ca ngày thường</th>
-                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Số giờ làm chủ nhật</th>
+                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Ngày công đi làm thực
+                                tế</th>
+                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Số giờ tăng ca ngày
+                                thường</th>
+                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Số giờ làm chủ nhật
+                            </th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Số giờ làm ngày lễ</th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tổng tiền tăng ca</th>
-                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tổng thu nhập thực tế</th>
+                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tổng thu nhập thực tế
+                            </th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">BHXH (8%) CN</th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">BHYT (1,5%) CN</th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">BHTN (1%) CN</th>
-                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tổng BHXH (10,5%) CN</th>
+                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tổng BHXH (10,5%) CN
+                            </th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Thuế TNCN</th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tạm ứng</th>
-                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Khoản giảm trừ khác</th>
+                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Khoản giảm trừ khác
+                            </th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Tổng các khoản trừ</th>
                             <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Thưởng</th>
-                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700 bg-blue-50">Thực lĩnh</th>
+                            <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700 bg-blue-50">Thực lĩnh
+                            </th>
                             <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">In</th>
                         </tr>
                     </thead>
@@ -599,9 +610,8 @@
         // Thêm thông báo lỗi/thành công
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-                type === 'success' ? 'bg-green-500' : 'bg-red-500'
-            } text-white`;
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
+                } text-white`;
             notification.innerHTML = message;
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
@@ -616,6 +626,7 @@
                     throw new Error('Không có IDBL trong URL');
                 }
 
+                // Lấy dữ liệu từ BLUONG
                 const banHangData = await apiRequest('BLUONG', 'Find', {
                     Rows: [],
                     Properties: { Selector: `Filter(BLUONG, [IDBL] = '${idbl}')` }
@@ -625,9 +636,14 @@
                     throw new Error('Không tìm thấy dữ liệu trong BLUONG');
                 }
 
+                // Lấy tên bảng lương từ dữ liệu
+                const tableName = banHangData[0]['Tên bảng lương'] || 'Không có tên';
+                document.getElementById('tableName').textContent = `- ${tableName}`;
+
                 allData = banHangData;
                 filteredData = allData;
 
+                // Lấy dữ liệu từ BLUONGDETAIL
                 const chiTietData = await apiRequest('BLUONGDETAIL', 'Find', {
                     Rows: [],
                     Properties: { Selector: `Filter(BLUONGDETAIL, [IDBL] = '${idbl}')` }
@@ -643,17 +659,18 @@
             }
         }
 
+
         // Cải thiện hàm xuất Excel
         async function exportTableToExcel() {
             try {
                 showLoading();
                 const table = document.getElementById("dataTable");
-                const workbook = XLSX.utils.table_to_book(table, { 
+                const workbook = XLSX.utils.table_to_book(table, {
                     sheet: "Bảng lương",
                     dateNF: 'dd/mm/yyyy',
                     cellStyles: true
                 });
-                
+
                 // Tùy chỉnh độ rộng cột
                 const worksheet = workbook.Sheets["Bảng lương"];
                 const cols = worksheet['!cols'] || [];
@@ -663,7 +680,7 @@
                 // Thêm độ rộng cho các cột khác...
                 worksheet['!cols'] = cols;
 
-                XLSX.writeFile(workbook, `BangLuong_${new Date().toISOString().slice(0,10)}.xlsx`);
+                XLSX.writeFile(workbook, `BangLuong_${new Date().toISOString().slice(0, 10)}.xlsx`);
                 showNotification('Xuất Excel thành công!');
             } catch (error) {
                 console.error('Error exporting to Excel:', error);
@@ -699,4 +716,5 @@
         };
     </script>
 </body>
+
 </html>
