@@ -532,7 +532,6 @@
         }
 
         // Update table function
-        // Update the table function to show employee data when filtering
         function updateTable(tableId, month, factory = 'all', positions = []) {
             const tbody = document.getElementById(`employee-data-${tableId}`);
             if (!tbody) {
@@ -579,7 +578,12 @@
                 filteredData = filteredData.filter(emp => positions.includes(emp.position));
             }
 
-            filteredData.sort((a, b) => b.hours - a.hours);
+            // Sort by employee ID (mã nhân viên)
+            filteredData.sort((a, b) => {
+                // Extract numeric part from employee ID for proper numeric sorting
+                const getNumericId = (id) => parseInt(id.replace(/[^\d]/g, '')) || 0;
+                return getNumericId(a.employeeId) - getNumericId(b.employeeId);
+            });
 
             if (filteredData.length === 0) {
                 tbody.innerHTML = `
