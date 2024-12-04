@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <title>Báo Cáo Tăng Ca - TH24</title>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">BÁO CÁO TÌNH HÌNH TĂNG CA NHÂN VIÊN</h1>
+
+            <!-- Filters Section -->
+            <div class="space-y-4">
+                <!-- Time Period and Factory Selection in one row -->
+                <div class="flex flex-wrap justify-center items-center gap-4">
+                    <div class="flex items-center gap-4" id="month-selects">
+                        <!-- Month selects will be dynamically added here -->
+                    </div>
+
+                    <select id="factory-filter"
+                        class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                        <option value="all">Tất cả nhà máy</option>
+                    </select>
+
+                    <div class="flex gap-2">
+                        <button onclick="exportToExcel()"
+                            class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
+                            Xuất Excel
+                        </button>
+                        <button onclick="window.print()"
+                            class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
+                            In báo cáo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Position Filter Buttons -->
+                <div class="flex flex-wrap justify-center gap-2" id="position-buttons">
+                    <!-- Position buttons will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator"
+            class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white p-4 rounded-lg">
+                <p class="text-lg">Đang tải dữ liệu...</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Table Left -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BẢNG CHI TIẾT TĂNG CA</h2>
+                <h2 class="text-lg font-semibold mb-4" id="month-title-1"></h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ tên</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Số giờ tăng
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tổng tiền
+                                    tăng ca</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
+                                    lương DN chi trả</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employee-data-1"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Table Right -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BẢNG CHI TIẾT TĂNG CA</h2>
+                <h2 class="text-lg font-semibold mb-4" id="month-title-2"></h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ tên</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Số giờ tăng
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tổng tiền
+                                    tăng ca</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
+                                    lương DN chi trả</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employee-data-2"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Tables - Thêm ngay trước thẻ đóng div container cuối cùng -->
+        <div id="summary-tables" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <div id="summary-table-1" class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BẢNG TỔNG HỢP THEO NHÀ MÁY</h2>
+                <h2 class="text-lg font-semibold mb-4" id="summary-title-1"></h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ Tên</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Công ty</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Số buổi làm
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
+                                    lương DN chi trả</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tỷ lệ %
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="summary-data-1"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="summary-table-2" class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BẢNG TỔNG HỢP THEO NHÀ MÁY</h2>
+                <h2 class="text-lg font-semibold mb-4" id="summary-title-2"></h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ Tên</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Công ty</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Số buổi làm
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
+                                    lương DN chi trả</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tỷ lệ %
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="summary-data-2"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- Summary Left -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">THỐNG KÊ TỔNG HỢP</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng số giờ</h3>
+                        <p class="text-2xl font-bold text-blue-600" id="total-hours-1">0</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng tiền tăng ca</h3>
+                        <p class="text-2xl font-bold text-green-600" id="total-salary-1">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Right -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">THỐNG KÊ TỔNG HỢP</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng số giờ</h3>
+                        <p class="text-2xl font-bold text-blue-600" id="total-hours-2">0</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng lương tăng ca</h3>
+                        <p class="text-2xl font-bold text-green-600" id="total-salary-2">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add this after the Factory Revenue Tables section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- Work Schedule Table Left -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">LỊCH CÔNG TÁC</h2>
+                <h2 class="text-lg font-semibold mb-4" id="schedule-month-title-1"></h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ và tên
+                                </th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Công ty vào
+                                </th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Công ty ra
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-data-1"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Work Schedule Table Right -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">LỊCH CÔNG TÁC</h2>
+                <h2 class="text-lg font-semibold mb-4" id="schedule-month-title-2"></h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ và tên
+                                </th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Công ty vào
+                                </th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Công ty ra
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-data-2"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Factory Revenue Tables -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- Revenue Table Left -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">DOANH THU NHÀ MÁY</h2>
+                <h2 class="text-lg font-semibold mb-4" id="revenue-month-title-1"></h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="revenue-data-1"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Revenue Table Right -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">DOANH THU NHÀ MÁY</h2>
+                <h2 class="text-lg font-semibold mb-4" id="revenue-month-title-2"></h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="revenue-data-2"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BIỂU ĐỒ SO SÁNH TĂNG CA</h2>
+                <canvas id="comparisonChart"></canvas>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BIỂU ĐỒ SO SÁNH TĂNG CA</h2>
+                <canvas id="factoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants for AppSheet connection
+        const appId = 'adec5120-c6cb-45d5-a6d3-18ee7a2bc1dc';
+        const accessKey = 'V2-fx0Jb-XsNQV-UlFiW-4mQBj-5c63c-wZaIk-D0LoM-o1Y74';
+        const region = 'www';
+
+        // Generate month/year options for the last 12 months
+        function generateMonthYearOptions() {
+            const options = [];
+            const currentDate = new Date();
+
+            // Get current month and year
+            let currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-11
+            let currentYear = currentDate.getFullYear();
+
+            // Generate options for current month and previous 12 months
+            for (let i = 0; i < 13; i++) {
+                options.unshift(`<option value="${currentMonth}" data-year="${currentYear}">Tháng ${currentMonth}/${currentYear}</option>`);
+
+                // Move to previous month
+                currentMonth--;
+                if (currentMonth === 0) {
+                    currentMonth = 12;
+                    currentYear--;
+                }
+            }
+
+            return options.join('');
+        }
+
+        // Initialize month selects
+        document.getElementById('month-selects').innerHTML = `
+    <select id="month-select-1" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        ${generateMonthYearOptions()}
+    </select>
+    <select id="month-select-2" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        ${generateMonthYearOptions()}
+    </select>
+`;
+
+        // Get initial months
+        function getInitialMonthsAndYears() {
+            const today = new Date();
+            const currentMonth = today.getMonth() + 1;
+            const currentYear = today.getFullYear();
+
+            // For right select (previous month)
+            let rightMonth = currentMonth;
+            let rightYear = currentYear;
+            if (currentMonth === 1) {
+                rightMonth = 12;
+                rightYear = currentYear - 1;
+            } else {
+                rightMonth = currentMonth - 1;
+            }
+
+            // For left select (month before previous month)
+            let leftMonth, leftYear;
+            if (rightMonth === 1) {
+                leftMonth = 12;
+                leftYear = rightYear - 1;
+            } else {
+                leftMonth = rightMonth - 1;
+                leftYear = rightYear;
+            }
+
+            return {
+                leftMonth,
+                leftYear,
+                rightMonth,
+                rightYear
+            };
+        }
+
+        // Update month title
+        function updateMonthTitle(elementId, month, year) {
+            document.getElementById(elementId).textContent = `Tháng ${month}/${year}`;
+        }
+
+        // Show/hide loading indicator
+        function toggleLoading(show) {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            loadingIndicator.style.display = show ? 'flex' : 'none';
+        }
+
+        // Function to create position buttons
+        function createPositionButtons(positions) {
+            const container = document.getElementById('position-buttons');
+            container.innerHTML = `
+                <button class="px-4 py-2 rounded-lg bg-blue-100 hover:bg-blue-200 transition select-none active"
+                        onclick="toggleAllPositions(true)">
+                    Tất cả
+                </button>
+            `;
+
+            positions.forEach(position => {
+                const button = document.createElement('button');
+                button.className = 'px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition select-none';
+                button.textContent = position;
+                button.dataset.position = position;
+                button.onclick = () => togglePosition(button);
+                container.appendChild(button);
+            });
+        }
+
+        // Function to toggle all positions
+        function toggleAllPositions(active) {
+            const buttons = document.querySelectorAll('#position-buttons button');
+            buttons.forEach(button => {
+                if (button.textContent === 'Tất cả') {
+                    button.classList.toggle('bg-blue-100', active);
+                    button.classList.toggle('bg-gray-100', !active);
+                    button.classList.toggle('active', active);
+                } else {
+                    button.classList.remove('bg-blue-100', 'active');
+                    button.classList.add('bg-gray-100');
+                }
+            });
+
+            updateFilters();
+        }
+
+        // Function to toggle individual position
+        function togglePosition(button) {
+            const allButton = document.querySelector('#position-buttons button:first-child');
+            allButton.classList.remove('bg-blue-100', 'active');
+            allButton.classList.add('bg-gray-100');
+
+            button.classList.toggle('bg-blue-100');
+            button.classList.toggle('bg-gray-100');
+            button.classList.toggle('active');
+
+            updateFilters();
+        }
+
+        // Function to get selected positions
+        function getSelectedPositions() {
+            const allButton = document.querySelector('#position-buttons button:first-child');
+            if (allButton.classList.contains('active')) {
+                return [];
+            }
+
+            return Array.from(document.querySelectorAll('#position-buttons button.bg-blue-100'))
+                .map(button => button.dataset.position)
+                .filter(Boolean);
+        }
+
+        // Fetch data from AppSheet
+        async function fetchAppSheetData() {
+            toggleLoading(true);
+            try {
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/BLUONGDETAIL/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: "Filter(BLUONGDETAIL, true)"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!Array.isArray(data)) {
+                    throw new Error('Invalid data format received');
+                }
+                console.log('Data received:', data);
+
+                // Process data
+                const positions = new Set();
+                const monthlyData = {};
+
+                data.forEach(record => {
+                    if (!record['NGÀY THÁNG'] || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(record['NGÀY THÁNG'])) {
+                        console.warn('Invalid date format:', record['NGÀY THÁNG']);
+                        return;
+                    }
+
+                    const dateParts = record['NGÀY THÁNG'].split('/');
+                    const month = parseInt(dateParts[0]);
+
+                    if (record['CHỨC VỤ']) {
+                        positions.add(record['CHỨC VỤ']);
+                    }
+
+                    if (!monthlyData[month]) {
+                        monthlyData[month] = [];
+                    }
+
+                    const hours = parseFloat(record['Số giờ tăng ca ngày thường']) + parseFloat(record['Số giờ làm chủ nhật']) + parseFloat(record['Số giờ làm ngày lễ']) || 0;
+                    const salary = parseFloat(record['Tổng tiền tăng ca']) || 0;
+
+                    const employeeData = {
+                        name: record['HỌ VÀ TÊN'] || '',
+                        factory: record['Nhà ở'] || '',
+                        hours: hours,
+                        salary: salary,
+                        employeeId: record['MÃ NHÂN VIÊN'] || '',
+                        position: record['CHỨC VỤ'] || '',
+                        totalSalary: parseFloat(record['Tổng thu nhập thực tế'].replace(/[^\d.-]/g, '')) || 0  // Thêm dòng này
+                    };
+
+                    const existingIndex = monthlyData[month].findIndex(
+                        item => item.employeeId === employeeData.employeeId
+                    );
+
+                    if (existingIndex === -1) {
+                        monthlyData[month].push(employeeData);
+                    } else {
+                        monthlyData[month][existingIndex].hours += employeeData.hours;
+                        monthlyData[month][existingIndex].salary += employeeData.salary;
+                        monthlyData[month][existingIndex].totalSalary += employeeData.totalSalary;  // Thêm dòng này
+                    }
+                });
+
+                createPositionButtons(Array.from(positions));
+                return monthlyData;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                throw error;
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        // Update table function
+        function updateTable(tableId, month, factory = 'all', positions = []) {
+            const tbody = document.getElementById(`employee-data-${tableId}`);
+            if (!tbody) {
+                console.error(`Table body not found for tableId: ${tableId}`);
+                return;
+            }
+
+            // Get year from stored values
+            const year = tableId === 1 ? window.currentLeftYear : window.currentRightYear;
+
+            if (!window.monthlyData || !window.monthlyData[month]) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="px-4 py-4 text-center text-gray-500">
+                            Không có dữ liệu tăng ca cho tháng ${month}/${year}
+                        </td>
+                    </tr>
+                `;
+                document.getElementById(`total-hours-${tableId}`).textContent = '0';
+                document.getElementById(`total-salary-${tableId}`).textContent = formatCurrency(0);
+                return;
+            }
+
+            let filteredData = window.monthlyData[month];
+
+            if (factory !== 'all') {
+                filteredData = filteredData.filter(emp => emp.factory === factory);
+            }
+
+            if (positions.length > 0) {
+                filteredData = filteredData.filter(emp => positions.includes(emp.position));
+            }
+
+            filteredData.sort((a, b) => b.hours - a.hours);
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="px-4 py-4 text-center text-gray-500">
+                            Không có dữ liệu tăng ca ${factory !== 'all' ? `cho nhà máy ${factory}` : ''} 
+                            ${positions.length > 0 ? `với chức vụ đã chọn` : ''} trong tháng ${month}/${year}
+                        </td>
+                    </tr>
+                `;
+                document.getElementById(`total-hours-${tableId}`).textContent = '0';
+                document.getElementById(`total-salary-${tableId}`).textContent = formatCurrency(0);
+                return;
+            }
+
+            tbody.innerHTML = filteredData.map((emp, index) => {
+                const hours = isNaN(emp.hours) ? 0 : emp.hours;
+                const salary = isNaN(emp.salary) ? 0 : emp.salary;
+                const totalSalary = isNaN(emp.totalSalary) ? 0 : emp.totalSalary;
+
+                return `
+            <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
+                <td class="px-4 py-2 text-sm">
+                    <div class="font-medium">${emp.name}</div>
+                    <div class="text-xs text-gray-500">${emp.employeeId} - ${emp.position}</div>
+                </td>
+                <td class="px-4 py-2 text-sm text-right">
+                    ${hours.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                </td>
+                <td class="px-4 py-2 text-sm text-right">${formatCurrency(salary)}</td>
+                <td class="px-4 py-2 text-sm text-right">${formatCurrency(totalSalary)}</td>
+            </tr>
+        `;
+            }).join('');
+
+            const totalHours = filteredData.reduce((sum, emp) => sum + (isNaN(emp.hours) ? 0 : emp.hours), 0);
+            const totalSalary = filteredData.reduce((sum, emp) => sum + (isNaN(emp.salary) ? 0 : emp.salary), 0);
+
+            document.getElementById(`total-hours-${tableId}`).textContent = totalHours.toLocaleString('vi-VN', {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+            document.getElementById(`total-salary-${tableId}`).textContent = formatCurrency(totalSalary);
+        }
+
+        // Update charts
+        async function updateCharts() {
+            try {
+                if (typeof Chart === 'undefined') {
+                    throw new Error('Chart.js library not loaded');
+                }
+
+                const select1 = document.getElementById('month-select-1');
+                const select2 = document.getElementById('month-select-2');
+
+                const month1 = parseInt(select1.value);
+                const month2 = parseInt(select2.value);
+                const year1 = parseInt(select1.options[select1.selectedIndex].dataset.year);
+                const year2 = parseInt(select2.options[select2.selectedIndex].dataset.year);
+
+                const factory = document.getElementById('factory-filter').value;
+                const positions = getSelectedPositions();
+
+                if (!window.monthlyData) {
+                    console.warn('No data available');
+                    return;
+                }
+
+                function filterData(data) {
+                    if (!data) return [];
+
+                    let filtered = [...data];
+
+                    if (factory !== 'all') {
+                        filtered = filtered.filter(emp => emp.factory === factory);
+                    }
+
+                    if (positions.length > 0) {
+                        filtered = filtered.filter(emp => positions.includes(emp.position));
+                    }
+
+                    return filtered;
+                }
+
+                const data1 = filterData(window.monthlyData[month1]);
+                const data2 = filterData(window.monthlyData[month2]);
+
+                // Update comparison chart
+                const ctxComparison = document.getElementById('comparisonChart');
+                if (comparisonChart instanceof Chart) {
+                    comparisonChart.destroy();
+                }
+
+                const allEmployees = [...data1];
+                data2.forEach(emp2 => {
+                    if (!allEmployees.find(emp1 => emp1.employeeId === emp2.employeeId)) {
+                        allEmployees.push(emp2);
+                    }
+                });
+                allEmployees.sort((a, b) => b.hours - a.hours);
+
+                const employeeNames = allEmployees.map(emp => emp.name);
+
+                comparisonChart = new Chart(ctxComparison, {
+                    type: 'bar',
+                    data: {
+                        labels: employeeNames,
+                        datasets: [
+                            {
+                                label: `Tháng ${month1}/${year1}`,
+                                data: employeeNames.map(name => {
+                                    const emp = data1.find(e => e.name === name);
+                                    return emp ? emp.hours : 0;
+                                }),
+                                backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                                borderColor: 'rgb(59, 130, 246)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: `Tháng ${month2}/${year2}`,
+                                data: employeeNames.map(name => {
+                                    const emp = data2.find(e => e.name === name);
+                                    return emp ? emp.hours : 0;
+                                }),
+                                backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                                borderColor: 'rgb(239, 68, 68)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `So sánh số giờ tăng ca${positions.length > 0 ? ' - ' + positions.join(', ') : ''}${factory !== 'all' ? ' - ' + factory : ''}`
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.dataset.label}: ${context.raw.toFixed(1)} giờ`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Số giờ'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Update factory chart
+                const ctxFactory = document.getElementById('factoryChart');
+                if (factoryChart instanceof Chart) {
+                    factoryChart.destroy();
+                }
+
+                function calculateFactoryStats(data) {
+                    return data.reduce((acc, emp) => {
+                        if (!acc[emp.factory]) {
+                            acc[emp.factory] = { hours: 0, salary: 0 };
+                        }
+                        acc[emp.factory].hours += emp.hours;
+                        acc[emp.factory].salary += emp.salary;
+                        return acc;
+                    }, {});
+                }
+
+                const factoryStats1 = calculateFactoryStats(data1);
+                const factoryStats2 = calculateFactoryStats(data2);
+
+                let factories = [...new Set([...Object.keys(factoryStats1), ...Object.keys(factoryStats2)])];
+
+                if (factory !== 'all') {
+                    factories = factories.filter(f => f === factory);
+                }
+
+                factoryChart = new Chart(ctxFactory, {
+                    type: 'bar',
+                    data: {
+                        labels: factories,
+                        datasets: [
+                            {
+                                label: `Tháng ${month1}/${year1}`,
+                                data: factories.map(f => factoryStats1[f]?.hours || 0),
+                                backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                                borderColor: 'rgb(59, 130, 246)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: `Tháng ${month2}/${year2}`,
+                                data: factories.map(f => factoryStats2[f]?.hours || 0),
+                                backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                                borderColor: 'rgb(239, 68, 68)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `So sánh số giờ tăng ca ngày thường theo nhà máy${positions.length > 0 ? ' - ' + positions.join(', ') : ''}`
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return `${context.dataset.label}: ${context.raw.toFixed(1)} giờ`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Tổng số giờ'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error updating charts:', error);
+                alert('Có lỗi khi cập nhật biểu đồ. Vui lòng tải lại trang.');
+            }
+        }
+
+        // Fetch revenue data from AppSheet
+        async function fetchRevenueData() {
+            try {
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/KB_DOANHTHU/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: "Filter(KB_DOANHTHU, true)"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!Array.isArray(data)) {
+                    throw new Error('Invalid data format received');
+                }
+
+                // Process revenue data
+                const monthlyRevenue = {};
+
+                data.forEach(record => {
+                    if (!record['Tháng']) {
+                        console.warn('Missing month:', record);
+                        return;
+                    }
+
+                    // Extract month number from "Tháng MM/YYYY" format
+                    const monthMatch = record['Tháng'].match(/Tháng (\d+)\/\d{4}/);
+                    if (!monthMatch) {
+                        console.warn('Invalid month format:', record['Tháng']);
+                        return;
+                    }
+
+                    const month = parseInt(monthMatch[1]);
+                    if (!monthlyRevenue[month]) {
+                        monthlyRevenue[month] = {};
+                    }
+
+                    const company = record['Tên công ty'] || 'Không xác định';
+                    const revenue = parseFloat(record['Doanh thu'].replace(/[^\d.-]/g, '')) || 0;
+
+                    if (!monthlyRevenue[month][company]) {
+                        monthlyRevenue[month][company] = 0;
+                    }
+                    monthlyRevenue[month][company] += revenue;
+                });
+
+                return monthlyRevenue;
+            } catch (error) {
+                console.error('Error fetching revenue data:', error);
+                throw error;
+            }
+        }
+
+        // Update revenue table function
+        function updateRevenueTable(tableId, month, selectedFactory = 'all') {
+            const tbody = document.getElementById(`revenue-data-${tableId}`);
+            if (!tbody) {
+                console.error(`Revenue table body not found for tableId: ${tableId}`);
+                return;
+            }
+
+            const year = tableId === 1 ? window.currentLeftYear : window.currentRightYear;
+
+            if (!window.monthlyRevenue || !window.monthlyRevenue[month]) {
+                tbody.innerHTML = `
+            <tr>
+                <td colspan="2" class="px-4 py-4 text-center text-gray-500">
+                    Không có dữ liệu doanh thu cho tháng ${month}/${year}
+                </td>
+            </tr>
+        `;
+                return;
+            }
+
+            const monthData = window.monthlyRevenue[month];
+            let companyData = Object.entries(monthData);
+
+            if (selectedFactory !== 'all') {
+                companyData = companyData.filter(([company]) => company === selectedFactory);
+            }
+
+            // Sort by revenue descending
+            companyData.sort(([, a], [, b]) => b - a);
+
+            if (companyData.length === 0) {
+                tbody.innerHTML = `
+            <tr>
+                <td colspan="2" class="px-4 py-4 text-center text-gray-500">
+                    Không có dữ liệu doanh thu ${selectedFactory !== 'all' ? `cho công ty ${selectedFactory}` : ''} trong tháng ${month}/${year}
+                </td>
+            </tr>
+        `;
+                return;
+            }
+
+            tbody.innerHTML = companyData.map(([company, revenue], index) => `
+        <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
+            <td class="px-4 py-2 text-sm font-medium">${company}</td>
+            <td class="px-4 py-2 text-sm text-right">${formatCurrency(revenue)}</td>
+        </tr>
+    `).join('');
+        }
+
+        // Fetch work schedule data from AppSheet
+        async function fetchWorkScheduleData() {
+            try {
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/LICH%20CV/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: "Filter(LICH CV, true)"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!Array.isArray(data)) {
+                    throw new Error('Invalid data format received');
+                }
+
+                const monthlySchedule = {};
+
+                data.forEach(record => {
+                    if (!record['NGÀY'] || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(record['NGÀY'])) {
+                        console.warn('Invalid date format:', record['NGÀY']);
+                        return;
+                    }
+
+                    const dateParts = record['NGÀY'].split('/');
+                    // Sửa lại vị trí lấy tháng - dateParts[0] là ngày, [1] là tháng, [2] là năm
+                    const month = parseInt(dateParts[0]);  // Thay đổi từ dateParts[1] thành dateParts[0]
+                    const year = parseInt(dateParts[2]);
+
+                    if (!monthlySchedule[month]) {
+                        monthlySchedule[month] = [];
+                    }
+
+                    const existingPersonIndex = monthlySchedule[month].findIndex(
+                        item => item.name === record['HỌ VÀ TÊN']
+                    );
+
+                    if (existingPersonIndex === -1) {
+                        monthlySchedule[month].push({
+                            name: record['HỌ VÀ TÊN'] || '',
+                            companyInList: record['TÊN CTY VÀO'] ? [record['TÊN CTY VÀO']] : [],
+                            companyOutList: record['TÊN CTY RA'] ? [record['TÊN CTY RA']] : []
+                        });
+                    } else {
+                        const person = monthlySchedule[month][existingPersonIndex];
+                        if (record['TÊN CTY VÀO']) {
+                            person.companyInList.push(record['TÊN CTY VÀO']);
+                        }
+                        if (record['TÊN CTY RA']) {
+                            person.companyOutList.push(record['TÊN CTY RA']);
+                        }
+                    }
+                });
+
+                return monthlySchedule;
+            } catch (error) {
+                console.error('Error fetching work schedule data:', error);
+                throw error;
+            }
+        }
+
+        // Update work schedule table function
+        function updateWorkScheduleTable(tableId, month, selectedFactory = 'all') {
+            const tbody = document.getElementById(`schedule-data-${tableId}`);
+            const titleElement = document.getElementById(`schedule-month-title-${tableId}`);
+            if (!tbody) {
+                console.error(`Schedule table body not found for tableId: ${tableId}`);
+                return;
+            }
+
+            const year = tableId === 1 ? window.currentLeftYear : window.currentRightYear;
+            titleElement.textContent = `Tháng ${month}/${year}`;
+
+            if (!window.monthlySchedule || !window.monthlySchedule[month]) {
+                tbody.innerHTML = `
+           <tr>
+               <td colspan="5" class="px-4 py-4 text-center text-gray-500">
+                   Không có dữ liệu lịch công việc cho tháng ${month}/${year}
+               </td>
+           </tr>
+       `;
+                return;
+            }
+
+            let scheduleData = window.monthlySchedule[month];
+
+            if (selectedFactory !== 'all') {
+                scheduleData = scheduleData.filter(schedule =>
+                    schedule.companyInList.includes(selectedFactory) ||
+                    schedule.companyOutList.includes(selectedFactory)
+                );
+            }
+
+            // Thêm header cho các cột mới
+            const tableHeader = document.querySelector(`#schedule-data-${tableId}`).closest('table').querySelector('thead tr');
+            if (tableHeader.children.length === 3) {
+                const companyTh = document.createElement('th');
+                companyTh.className = 'px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase';
+                companyTh.textContent = 'Công ty';
+                tableHeader.appendChild(companyTh);
+
+                const workdaysTh = document.createElement('th');
+                workdaysTh.className = 'px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase';
+                workdaysTh.textContent = 'Ngày công';
+                tableHeader.appendChild(workdaysTh);
+            }
+
+            tbody.innerHTML = scheduleData.map((person, index) => {
+                // Đếm số lần xuất hiện của mỗi công ty
+                const companyInCounts = {};
+                const companyOutCounts = {};
+                const totalCompanyCounts = {};
+
+                // Đếm cho công ty vào 
+                person.companyInList.forEach(company => {
+                    companyInCounts[company] = (companyInCounts[company] || 0) + 1;
+                    totalCompanyCounts[company] = true; // Chỉ đánh dấu sự tồn tại
+                });
+
+                // Đếm cho công ty ra
+                person.companyOutList.forEach(company => {
+                    companyOutCounts[company] = (companyOutCounts[company] || 0) + 1;
+                    totalCompanyCounts[company] = true; // Chỉ đánh dấu sự tồn tại  
+                });
+
+                // Format danh sách công ty với số lần xuất hiện
+                const formatCompanies = (companyCounts) => {
+                    return Object.entries(companyCounts)
+                        .map(([company, count]) => count > 1 ? `${company} (${count})` : company)
+                        .join(', ');
+                };
+
+                // Format tổng công ty với số buổi trung bình
+                const formatTotalCompanies = (totalCounts, inCounts, outCounts) => {
+                    return Object.entries(totalCounts)
+                        .map(([company]) => {
+                            const inCount = inCounts[company] || 0;
+                            const outCount = outCounts[company] || 0;
+                            const avgCount = (inCount + outCount) / 2;
+                            return `${company} (${avgCount})`;
+                        })
+                        .join(', ');
+                };
+
+                // Tính tổng số ngày công từ cột công ty
+                let totalWorkdays = Object.keys(totalCompanyCounts).reduce((total, company) => {
+                    const inCount = companyInCounts[company] || 0;
+                    const outCount = companyOutCounts[company] || 0;
+                    return total + (inCount + outCount) / 2;
+                }, 0);
+
+                const companiesIn = formatCompanies(companyInCounts);
+                const companiesOut = formatCompanies(companyOutCounts);
+                const totalCompanies = formatTotalCompanies(totalCompanyCounts, companyInCounts, companyOutCounts);
+
+                return `
+           <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
+               <td class="px-4 py-2 text-sm font-medium">${person.name}</td>
+               <td class="px-4 py-2 text-sm">${companiesIn || '-'}</td>
+               <td class="px-4 py-2 text-sm">${companiesOut || '-'}</td>
+               <td class="px-4 py-2 text-sm">${totalCompanies || '-'}</td>
+               <td class="px-4 py-2 text-sm text-right">${totalWorkdays}</td>
+           </tr>
+       `;
+            }).join('');
+        }
+
+        // Add this function to fetch companies
+        async function fetchCompanies() {
+            try {
+                const response = await fetch(`https://${region}.appsheet.com/api/v2/apps/${appId}/tables/KB_CONGTY/Action`, {
+                    method: 'POST',
+                    headers: {
+                        'ApplicationAccessKey': accessKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        Action: 'Find',
+                        Properties: {},
+                        Selector: "Filter(KB_CONGTY, true)"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!Array.isArray(data)) {
+                    throw new Error('Invalid data format received');
+                }
+
+                // Get the factory filter select element
+                const factoryFilter = document.getElementById('factory-filter');
+
+                // Clear existing options except "Tất cả nhà máy"
+                while (factoryFilter.options.length > 1) {
+                    factoryFilter.remove(1);
+                }
+
+                // Add companies to the filter
+                data.forEach(company => {
+                    if (company['Tên công ty']) {
+                        const option = document.createElement('option');
+                        option.value = company['Tên công ty'];
+                        option.textContent = company['Tên công ty'];
+                        factoryFilter.appendChild(option);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error fetching companies:', error);
+                alert('Không thể tải danh sách công ty. Vui lòng thử lại sau.');
+            }
+        }
+
+        // Hàm tạo dữ liệu tổng hợp
+        function generateSummaryData(monthData, revenueData, scheduleData) {
+            const summary = [];
+            const factoryGroups = {};
+
+            // Lấy dữ liệu công ty và nhân viên từ lịch công tác
+            scheduleData.forEach(schedule => {
+                const companyWorkdays = {};
+                let totalWorkdays = 0;
+
+                // Tính tổng số buổi làm việc của nhân viên
+                schedule.companyInList.forEach(company => {
+                    if (!companyWorkdays[company]) companyWorkdays[company] = 0;
+                    companyWorkdays[company]++;
+                    totalWorkdays++;
+                });
+                schedule.companyOutList.forEach(company => {
+                    if (!companyWorkdays[company]) companyWorkdays[company] = 0;
+                    companyWorkdays[company]++;
+                    totalWorkdays++;
+                });
+
+                // Lấy thông tin lương từ bảng chi tiết tăng ca
+                const employeeData = monthData.find(e => e.name === schedule.name) || {
+                    totalSalary: 0
+                };
+
+                // Tính lương theo tỷ lệ cho từng công ty
+                Object.entries(companyWorkdays).forEach(([company, workdays]) => {
+                    if (!factoryGroups[company]) {
+                        factoryGroups[company] = {
+                            employees: [],
+                            revenue: revenueData[company] || 0,
+                            totalSalary: 0
+                        };
+                    }
+
+                    // Tính lương theo tỷ lệ số buổi làm việc
+                    const ratio = workdays / (totalWorkdays || 1);
+                    const salary = employeeData.totalSalary * ratio;
+
+                    factoryGroups[company].employees.push({
+                        name: schedule.name,
+                        workdays: workdays,
+                        salary: salary
+                    });
+                    factoryGroups[company].totalSalary += salary;
+                });
+            });
+
+            let stt = 1;
+            // Xử lý từng nhà máy
+            Object.entries(factoryGroups).forEach(([company, data]) => {
+                const companyPercentage = data.revenue ? ((data.totalSalary / data.revenue) * 100).toFixed(2) : 0;
+
+                // Thêm dòng tổng công ty
+                summary.push({
+                    stt: stt++,
+                    name: `TỔNG CỘNG ${company.toUpperCase()}`,
+                    company: company,
+                    revenue: data.revenue,
+                    salary: data.totalSalary,
+                    percent: companyPercentage,
+                    isTotal: true
+                });
+
+                // Thêm chi tiết nhân viên
+                data.employees.forEach(emp => {
+                    const employeePercentage = data.revenue ? ((emp.salary / data.revenue) * 100).toFixed(2) : 0;
+                    summary.push({
+                        stt: stt++,
+                        name: emp.name,
+                        company: company,
+                        workdays: emp.workdays,
+                        revenue: data.revenue,
+                        salary: emp.salary,
+                        percent: employeePercentage,
+                        isTotal: false
+                    });
+                });
+            });
+
+            return summary;
+        }
+
+        function updateSummaryTable(tableId, month) {
+            const tbody = document.getElementById(`summary-data-${tableId}`);
+            const titleElement = document.getElementById(`summary-title-${tableId}`);
+            const year = tableId === 1 ? window.currentLeftYear : window.currentRightYear;
+
+            titleElement.textContent = `Tháng ${month}/${year}`;
+
+            if (!window.monthlyData || !window.monthlyRevenue || !window.monthlySchedule) {
+                tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="px-4 py-4 text-center text-gray-500">
+                    Không có đủ dữ liệu tổng hợp cho tháng ${month}/${year}
+                </td>
+            </tr>
+        `;
+                return;
+            }
+
+            const summaryData = generateSummaryData(
+                window.monthlyData[month] || [],
+                window.monthlyRevenue[month] || {},
+                window.monthlySchedule[month] || []
+            );
+
+            tbody.innerHTML = summaryData.map((row) => `
+        <tr class="${row.isTotal ? 'font-bold bg-gray-100' : 'bg-white'}">
+            <td class="px-4 py-2 text-sm">${row.stt}</td>
+            <td class="px-4 py-2 text-sm">${row.name}</td>
+            <td class="px-4 py-2 text-sm">${row.company}</td>
+            <td class="px-4 py-2 text-sm text-right">${formatCurrency(row.revenue)}</td>
+            <td class="px-4 py-2 text-sm text-right">${!row.isTotal ? `(${row.workdays} buổi)` : ''}</td>
+            <td class="px-4 py-2 text-sm text-right">${formatCurrency(row.salary)}</td>
+            <td class="px-4 py-2 text-sm text-right">${row.percent}%</td>
+        </tr>
+    `).join('');
+        }
+
+        // Function to update filters
+        function updateFilters() {
+            const factory = document.getElementById('factory-filter').value;
+            const positions = getSelectedPositions();
+            const select1 = document.getElementById('month-select-1');
+            const select2 = document.getElementById('month-select-2');
+
+            const month1 = parseInt(select1.value);
+            const month2 = parseInt(select2.value);
+
+            updateTable(1, month1, factory, positions);
+            updateTable(2, month2, factory, positions);
+            updateRevenueTable(1, month1, factory);
+            updateRevenueTable(2, month2, factory);
+            updateWorkScheduleTable(1, month1, factory);
+            updateWorkScheduleTable(2, month2, factory);
+            // Thêm 2 dòng này
+            updateSummaryTable(1, month1);
+            updateSummaryTable(2, month2);
+            updateCharts();
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            const select1 = document.getElementById('month-select-1');
+            const select2 = document.getElementById('month-select-2');
+
+            const month1 = parseInt(select1.value);
+            const month2 = parseInt(select2.value);
+            const year1 = parseInt(select1.options[select1.selectedIndex].dataset.year);
+            const year2 = parseInt(select2.options[select2.selectedIndex].dataset.year);
+
+            const factory = document.getElementById('factory-filter').value;
+            const positions = getSelectedPositions();
+
+            let data1 = window.monthlyData[month1] || [];
+            let data2 = window.monthlyData[month2] || [];
+
+            if (factory !== 'all') {
+                data1 = data1.filter(emp => emp.factory === factory);
+                data2 = data2.filter(emp => emp.factory === factory);
+            }
+
+            if (positions.length > 0) {
+                data1 = data1.filter(emp => positions.includes(emp.position));
+                data2 = data2.filter(emp => positions.includes(emp.position));
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            const ws1 = XLSX.utils.json_to_sheet(data1.map(emp => ({
+                'Họ và tên': emp.name,
+                'Mã nhân viên': emp.employeeId,
+                'Chức vụ': emp.position,
+                'Nhà máy': emp.factory,
+                'Số giờ tăng ca': emp.hours,
+                'Tăng ca x150%': emp.salary,
+                'Chi phí lương DN chi trả': emp['Tổng thu nhập thực tế']
+            })));
+
+            const ws2 = XLSX.utils.json_to_sheet(data2.map(emp => ({
+                'Họ và tên': emp.name,
+                'Mã nhân viên': emp.employeeId,
+                'Chức vụ': emp.position,
+                'Nhà máy': emp.factory,
+                'Số giờ tăng ca': emp.hours,
+                'Tăng ca x150%': emp.salary,
+                'Chi phí lương DN chi trả': emp['Tổng thu nhập thực tế']
+            })));
+
+            XLSX.utils.book_append_sheet(wb, ws1, `Tháng ${month1}/${year1}`);
+            XLSX.utils.book_append_sheet(wb, ws2, `Tháng ${month2}/${year2}`);
+
+            XLSX.writeFile(wb, `Bao_cao_tang_ca_thang_${month1}_${year1}_${month2}_${year2}.xlsx`);
+        }
+
+        // Event listeners for month selects
+        document.getElementById('month-select-1').addEventListener('change', async (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const month1 = parseInt(e.target.value);
+            const year1 = parseInt(selectedOption.dataset.year);
+
+            const select2 = document.getElementById('month-select-2');
+            const month2 = parseInt(select2.value);
+            const year2 = parseInt(select2.options[select2.selectedIndex].dataset.year);
+
+            window.currentLeftYear = year1;
+            updateMonthTitle('schedule-month-title-1', month1, year1);
+
+            // Check if we need to adjust right month/year
+            if (year1 > year2 || (year1 === year2 && month1 >= month2)) {
+                if (month1 === 12) {
+                    window.currentRightYear = year1 + 1;
+                    Array.from(select2.options).forEach(option => {
+                        if (parseInt(option.value) === 1 && parseInt(option.dataset.year) === year1 + 1) {
+                            option.selected = true;
+                        }
+                    });
+                    updateMonthTitle('month-title-2', 1, year1 + 1);
+                } else {
+                    window.currentRightYear = year1;
+                    Array.from(select2.options).forEach(option => {
+                        if (parseInt(option.value) === month1 + 1 && parseInt(option.dataset.year) === year1) {
+                            option.selected = true;
+                        }
+                    });
+                    updateMonthTitle('month-title-2', month1 + 1, year1);
+                }
+            }
+
+            updateMonthTitle('month-title-1', month1, year1);
+            updateFilters();
+        });
+
+        document.getElementById('month-select-2').addEventListener('change', async (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const month2 = parseInt(e.target.value);
+            const year2 = parseInt(selectedOption.dataset.year);
+
+            const select1 = document.getElementById('month-select-1');
+            const month1 = parseInt(select1.value);
+            const year1 = parseInt(select1.options[select1.selectedIndex].dataset.year);
+
+            window.currentRightYear = year2;
+            updateMonthTitle('schedule-month-title-2', month2, year2);
+
+            // Check if we need to adjust left month/year
+            if (year2 < year1 || (year2 === year1 && month2 <= month1)) {
+                if (month2 === 1) {
+                    window.currentLeftYear = year2 - 1;
+                    Array.from(select1.options).forEach(option => {
+                        if (parseInt(option.value) === 12 && parseInt(option.dataset.year) === year2 - 1) {
+                            option.selected = true;
+                        }
+                    });
+                    updateMonthTitle('month-title-1', 12, year2 - 1);
+                } else {
+                    window.currentLeftYear = year2;
+                    Array.from(select1.options).forEach(option => {
+                        if (parseInt(option.value) === month2 - 1 && parseInt(option.dataset.year) === year2) {
+                            option.selected = true;
+                        }
+                    });
+                    updateMonthTitle('month-title-1', month2 - 1, year2);
+                }
+            }
+
+            updateMonthTitle('month-title-2', month2, year2);
+            updateFilters();
+        });
+
+        // Event listener for factory filter
+        document.getElementById('factory-filter').addEventListener('change', updateFilters);
+
+        // Initialize application
+        window.addEventListener('load', async () => {
+            try {
+                // Add fetchCompanies to the initial loading sequence
+                await fetchCompanies();
+                const { leftMonth, leftYear, rightMonth, rightYear } = getInitialMonthsAndYears();
+
+                window.currentLeftYear = leftYear;
+                window.currentRightYear = rightYear;
+
+                const select1 = document.getElementById('month-select-1');
+                const select2 = document.getElementById('month-select-2');
+
+                Array.from(select1.options).forEach(option => {
+                    if (parseInt(option.value) === leftMonth &&
+                        parseInt(option.dataset.year) === leftYear) {
+                        option.selected = true;
+                    }
+                });
+
+                Array.from(select2.options).forEach(option => {
+                    if (parseInt(option.value) === rightMonth &&
+                        parseInt(option.dataset.year) === rightYear) {
+                        option.selected = true;
+                    }
+                });
+
+                updateMonthTitle('month-title-1', leftMonth, leftYear);
+                updateMonthTitle('month-title-2', rightMonth, rightYear);
+                updateMonthTitle('revenue-month-title-1', leftMonth, leftYear);
+                updateMonthTitle('revenue-month-title-2', rightMonth, rightYear);
+
+                // Thêm 2 dòng cập nhật tiêu đề cho lịch công việc
+                updateMonthTitle('schedule-month-title-1', leftMonth, leftYear);
+                updateMonthTitle('schedule-month-title-2', rightMonth, rightYear);
+
+                // Fetch cả 3 loại dữ liệu
+                const [monthlyData, monthlyRevenue, monthlySchedule] = await Promise.all([
+                    fetchAppSheetData(),
+                    fetchRevenueData(),
+                    fetchWorkScheduleData()
+                ]);
+
+                window.monthlyData = monthlyData;
+                window.monthlyRevenue = monthlyRevenue;
+                window.monthlySchedule = monthlySchedule;  // Thêm dòng này
+
+                // Thêm 2 dòng này
+                updateSummaryTable(1, leftMonth);
+                updateSummaryTable(2, rightMonth);
+
+                updateTable(1, leftMonth, 'all', []);
+                updateTable(2, rightMonth, 'all', []);
+                updateRevenueTable(1, leftMonth, 'all');
+                updateRevenueTable(2, rightMonth, 'all');
+                // Thêm 2 dòng cập nhật bảng lịch công việc
+                updateWorkScheduleTable(1, leftMonth, 'all');
+                updateWorkScheduleTable(2, rightMonth, 'all');
+
+                await updateCharts();
+            } catch (error) {
+                console.error('Failed to initialize application:', error);
+                alert('Không thể tải dữ liệu từ AppSheet. Vui lòng thử lại sau.');
+            }
+        });
+    </script>
+</body>
+
+</html>
