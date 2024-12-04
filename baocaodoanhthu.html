@@ -12,7 +12,7 @@
 </head>
 
 <body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-8">
+    <div class=" mx-auto px-4 py-8">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
             <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">BÁO CÁO TÌNH HÌNH TĂNG CA NHÂN VIÊN</h1>
@@ -61,7 +61,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Table Left -->
             <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BẢNG CHI TIẾT TĂNG CA</h2>
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BẢNG CHI TIẾT TĂNG CA VÀ LƯƠNG</h2>
                 <h2 class="text-lg font-semibold mb-4" id="month-title-1"></h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
@@ -83,7 +83,7 @@
 
             <!-- Table Right -->
             <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BẢNG CHI TIẾT TĂNG CA</h2>
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BẢNG CHI TIẾT TĂNG CA VÀ LƯƠNG</h2>
                 <h2 class="text-lg font-semibold mb-4" id="month-title-2"></h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full">
@@ -104,6 +104,39 @@
             </div>
         </div>
 
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- Summary Left -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">THỐNG KÊ TỔNG HỢP</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng số giờ tăng ca</h3>
+                        <p class="text-2xl font-bold text-blue-600" id="total-hours-1">0</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng tiền tăng ca</h3>
+                        <p class="text-2xl font-bold text-green-600" id="total-salary-1">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Right -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">THỐNG KÊ TỔNG HỢP</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng số giờ tăng ca</h3>
+                        <p class="text-2xl font-bold text-blue-600" id="total-hours-2">0</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng lương tăng ca</h3>
+                        <p class="text-2xl font-bold text-green-600" id="total-salary-2">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Summary Tables - Thêm ngay trước thẻ đóng div container cuối cùng -->
         <div id="summary-tables" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <div id="summary-table-1" class="bg-white rounded-lg shadow-lg p-6">
@@ -113,9 +146,7 @@
                     <table class="min-w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ Tên</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Công ty</th>
                                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
                                 </th>
                                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Số buổi làm
@@ -138,9 +169,7 @@
                     <table class="min-w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">STT</th>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Họ Tên</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Công ty</th>
                                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
                                 </th>
                                 <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Số buổi làm
@@ -153,43 +182,6 @@
                         </thead>
                         <tbody id="summary-data-2"></tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-
-
-
-
-
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <!-- Summary Left -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">THỐNG KÊ TỔNG HỢP</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-600">Tổng số giờ</h3>
-                        <p class="text-2xl font-bold text-blue-600" id="total-hours-1">0</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-600">Tổng tiền tăng ca</h3>
-                        <p class="text-2xl font-bold text-green-600" id="total-salary-1">0</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Summary Right -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">THỐNG KÊ TỔNG HỢP</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-600">Tổng số giờ</h3>
-                        <p class="text-2xl font-bold text-blue-600" id="total-hours-2">0</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-600">Tổng lương tăng ca</h3>
-                        <p class="text-2xl font-bold text-green-600" id="total-salary-2">0</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -247,7 +239,11 @@
                 <h2 class="text-xl font-bold text-center text-gray-800 mb-4">DOANH THU NHÀ MÁY</h2>
                 <h2 class="text-lg font-semibold mb-4" id="revenue-month-title-1"></h2>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full">
+                    <div class="mt-4" style="height: 400px; position: relative;"> <!-- Thêm style -->
+                        <canvas id="revenue-chart-1"></canvas>
+                    </div>
+                    <!-- Bảng -->
+                    <table class="min-w-full mt-4">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
@@ -265,7 +261,11 @@
                 <h2 class="text-xl font-bold text-center text-gray-800 mb-4">DOANH THU NHÀ MÁY</h2>
                 <h2 class="text-lg font-semibold mb-4" id="revenue-month-title-2"></h2>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full">
+                    <div class="mt-4" style="height: 400px; position: relative;"> <!-- Thêm style -->
+                        <canvas id="revenue-chart-2"></canvas>
+                    </div>
+                    <!-- Bảng -->
+                    <table class="min-w-full mt-4">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
@@ -532,6 +532,7 @@
         }
 
         // Update table function
+        // Update the table function to show employee data when filtering
         function updateTable(tableId, month, factory = 'all', positions = []) {
             const tbody = document.getElementById(`employee-data-${tableId}`);
             if (!tbody) {
@@ -539,26 +540,39 @@
                 return;
             }
 
-            // Get year from stored values
             const year = tableId === 1 ? window.currentLeftYear : window.currentRightYear;
 
             if (!window.monthlyData || !window.monthlyData[month]) {
                 tbody.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="px-4 py-4 text-center text-gray-500">
-                            Không có dữ liệu tăng ca cho tháng ${month}/${year}
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td colspan="4" class="px-4 py-4 text-center text-gray-500">
+                    Không có dữ liệu tăng ca cho nhà máy ${factory !== 'all' ? factory : ''} trong tháng ${month}/${year}
+                </td>
+            </tr>
+        `;
                 document.getElementById(`total-hours-${tableId}`).textContent = '0';
                 document.getElementById(`total-salary-${tableId}`).textContent = formatCurrency(0);
                 return;
             }
 
-            let filteredData = window.monthlyData[month];
+            // Get work schedule data to determine which employees work at which factory
+            const scheduleData = window.monthlySchedule[month] || [];
+            const employeesAtFactory = new Set();
 
             if (factory !== 'all') {
-                filteredData = filteredData.filter(emp => emp.factory === factory);
+                scheduleData.forEach(schedule => {
+                    const worksAtFactory = [...schedule.companyInList, ...schedule.companyOutList].includes(factory);
+                    if (worksAtFactory) {
+                        employeesAtFactory.add(schedule.name);
+                    }
+                });
+            }
+
+            let filteredData = window.monthlyData[month];
+
+            // Apply factory filter based on schedule data
+            if (factory !== 'all') {
+                filteredData = filteredData.filter(emp => employeesAtFactory.has(emp.name));
             }
 
             if (positions.length > 0) {
@@ -569,13 +583,13 @@
 
             if (filteredData.length === 0) {
                 tbody.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="px-4 py-4 text-center text-gray-500">
-                            Không có dữ liệu tăng ca ${factory !== 'all' ? `cho nhà máy ${factory}` : ''} 
-                            ${positions.length > 0 ? `với chức vụ đã chọn` : ''} trong tháng ${month}/${year}
-                        </td>
-                    </tr>
-                `;
+            <tr>
+                <td colspan="4" class="px-4 py-4 text-center text-gray-500">
+                    Không có dữ liệu tăng ca cho nhà máy ${factory !== 'all' ? factory : ''} 
+                    ${positions.length > 0 ? `với chức vụ đã chọn` : ''} trong tháng ${month}/${year}
+                </td>
+            </tr>
+        `;
                 document.getElementById(`total-hours-${tableId}`).textContent = '0';
                 document.getElementById(`total-salary-${tableId}`).textContent = formatCurrency(0);
                 return;
@@ -850,23 +864,29 @@
 
                     // Extract month number from "Tháng MM/YYYY" format
                     const monthMatch = record['Tháng'].match(/Tháng (\d+)\/\d{4}/);
-                    if (!monthMatch) {
+                    const yearMatch = record['Tháng'].match(/\/(\d{4})/);
+
+                    if (!monthMatch || !yearMatch) {
                         console.warn('Invalid month format:', record['Tháng']);
                         return;
                     }
 
                     const month = parseInt(monthMatch[1]);
-                    if (!monthlyRevenue[month]) {
-                        monthlyRevenue[month] = {};
+                    const year = parseInt(yearMatch[1]);
+
+                    // Tạo key duy nhất cho từng tháng/năm
+                    const monthKey = `${month}_${year}`;
+                    if (!monthlyRevenue[monthKey]) {
+                        monthlyRevenue[monthKey] = {};
                     }
 
                     const company = record['Tên công ty'] || 'Không xác định';
                     const revenue = parseFloat(record['Doanh thu'].replace(/[^\d.-]/g, '')) || 0;
 
-                    if (!monthlyRevenue[month][company]) {
-                        monthlyRevenue[month][company] = 0;
+                    if (!monthlyRevenue[monthKey][company]) {
+                        monthlyRevenue[monthKey][company] = 0;
                     }
-                    monthlyRevenue[month][company] += revenue;
+                    monthlyRevenue[monthKey][company] += revenue;
                 });
 
                 return monthlyRevenue;
@@ -879,14 +899,20 @@
         // Update revenue table function
         function updateRevenueTable(tableId, month, selectedFactory = 'all') {
             const tbody = document.getElementById(`revenue-data-${tableId}`);
-            if (!tbody) {
-                console.error(`Revenue table body not found for tableId: ${tableId}`);
+            const titleElement = document.getElementById(`revenue-month-title-${tableId}`);
+            const chartCanvas = document.getElementById(`revenue-chart-${tableId}`);
+
+            if (!tbody || !titleElement) {
+                console.error(`Revenue table elements not found for tableId: ${tableId}`);
                 return;
             }
 
             const year = tableId === 1 ? window.currentLeftYear : window.currentRightYear;
+            titleElement.textContent = `Tháng ${month}/${year}`;
 
-            if (!window.monthlyRevenue || !window.monthlyRevenue[month]) {
+            const monthKey = `${month}_${year}`;
+
+            if (!window.monthlyRevenue || !window.monthlyRevenue[monthKey]) {
                 tbody.innerHTML = `
             <tr>
                 <td colspan="2" class="px-4 py-4 text-center text-gray-500">
@@ -894,19 +920,25 @@
                 </td>
             </tr>
         `;
+
+                // Xóa biểu đồ nếu không có dữ liệu
+                const chartId = `revenue-chart-${tableId}`;
+                if (window[chartId] instanceof Chart) {
+                    window[chartId].destroy();
+                }
                 return;
             }
 
-            const monthData = window.monthlyRevenue[month];
+            const monthData = window.monthlyRevenue[monthKey];
             let companyData = Object.entries(monthData);
 
             if (selectedFactory !== 'all') {
                 companyData = companyData.filter(([company]) => company === selectedFactory);
             }
 
-            // Sort by revenue descending
             companyData.sort(([, a], [, b]) => b - a);
 
+            // Cập nhật bảng
             if (companyData.length === 0) {
                 tbody.innerHTML = `
             <tr>
@@ -924,6 +956,75 @@
             <td class="px-4 py-2 text-sm text-right">${formatCurrency(revenue)}</td>
         </tr>
     `).join('');
+
+            // Vẽ biểu đồ
+            const chartId = `revenue-chart-${tableId}`;
+            if (window[chartId] instanceof Chart) {
+                window[chartId].destroy();
+            }
+
+            window[chartId] = new Chart(chartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: companyData.map(([company]) => company),
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: companyData.map(([, revenue]) => revenue),
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    height: 300,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Biểu đồ doanh thu tháng ${month}/${year}`,
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    if (value >= 1000000000) {
+                                        return (value / 1000000000).toFixed(1) + ' tỷ';
+                                    }
+                                    if (value >= 1000000) {
+                                        return (value / 1000000).toFixed(0) + ' tr';
+                                    }
+                                    return formatCurrency(value);
+                                },
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         // Fetch work schedule data from AppSheet
@@ -1152,16 +1253,18 @@
         }
 
         // Hàm tạo dữ liệu tổng hợp
-        function generateSummaryData(monthData, revenueData, scheduleData) {
+        // Inside the generateSummaryData function, modify the factory filtering logic:
+
+        function generateSummaryData(monthData, monthlyRevenue, scheduleData, month, year) {
+            const monthKey = `${month}_${year}`;
+            const revenueData = monthlyRevenue[monthKey] || {};
             const summary = [];
             const factoryGroups = {};
 
-            // Lấy dữ liệu công ty và nhân viên từ lịch công tác
             scheduleData.forEach(schedule => {
                 const companyWorkdays = {};
                 let totalWorkdays = 0;
 
-                // Tính tổng số buổi làm việc của nhân viên
                 schedule.companyInList.forEach(company => {
                     if (!companyWorkdays[company]) companyWorkdays[company] = 0;
                     companyWorkdays[company]++;
@@ -1173,12 +1276,10 @@
                     totalWorkdays++;
                 });
 
-                // Lấy thông tin lương từ bảng chi tiết tăng ca
                 const employeeData = monthData.find(e => e.name === schedule.name) || {
                     totalSalary: 0
                 };
 
-                // Tính lương theo tỷ lệ cho từng công ty
                 Object.entries(companyWorkdays).forEach(([company, workdays]) => {
                     if (!factoryGroups[company]) {
                         factoryGroups[company] = {
@@ -1188,47 +1289,41 @@
                         };
                     }
 
-                    // Tính lương theo tỷ lệ số buổi làm việc
-                    const ratio = workdays / (totalWorkdays || 1);
-                    const salary = employeeData.totalSalary * ratio;
-
+                    const avgWorkdays = +(workdays / 2).toFixed(1);
                     factoryGroups[company].employees.push({
                         name: schedule.name,
-                        workdays: workdays,
-                        salary: salary
+                        workdays: avgWorkdays,
+                        salary: employeeData.totalSalary * (avgWorkdays / (totalWorkdays / 2 || 1))
                     });
-                    factoryGroups[company].totalSalary += salary;
+                    factoryGroups[company].totalSalary += employeeData.totalSalary * (avgWorkdays / (totalWorkdays / 2 || 1));
                 });
             });
 
-            let stt = 1;
-            // Xử lý từng nhà máy
+            // Modified filtering logic to maintain visibility of employees
             Object.entries(factoryGroups).forEach(([company, data]) => {
                 const companyPercentage = data.revenue ? ((data.totalSalary / data.revenue) * 100).toFixed(2) : 0;
 
-                // Thêm dòng tổng công ty
+                // Always add the company total
                 summary.push({
-                    stt: stt++,
-                    name: `TỔNG CỘNG ${company.toUpperCase()}`,
-                    company: company,
+                    name: `${company.toUpperCase()}`,
                     revenue: data.revenue,
                     salary: data.totalSalary,
                     percent: companyPercentage,
-                    isTotal: true
+                    isTotal: true,
+                    company: company // Add company identifier
                 });
 
-                // Thêm chi tiết nhân viên
+                // Add all employees under this company
                 data.employees.forEach(emp => {
                     const employeePercentage = data.revenue ? ((emp.salary / data.revenue) * 100).toFixed(2) : 0;
                     summary.push({
-                        stt: stt++,
                         name: emp.name,
-                        company: company,
                         workdays: emp.workdays,
                         revenue: data.revenue,
                         salary: emp.salary,
                         percent: employeePercentage,
-                        isTotal: false
+                        isTotal: false,
+                        company: company // Add company identifier
                     });
                 });
             });
@@ -1236,7 +1331,8 @@
             return summary;
         }
 
-        function updateSummaryTable(tableId, month) {
+        // Modified updateSummaryTable function 
+        function updateSummaryTable(tableId, month, selectedFactory = 'all', positions = []) {
             const tbody = document.getElementById(`summary-data-${tableId}`);
             const titleElement = document.getElementById(`summary-title-${tableId}`);
             const year = tableId === 1 ? window.currentLeftYear : window.currentRightYear;
@@ -1246,7 +1342,7 @@
             if (!window.monthlyData || !window.monthlyRevenue || !window.monthlySchedule) {
                 tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="px-4 py-4 text-center text-gray-500">
+                <td colspan="5" class="px-4 py-4 text-center text-gray-500">
                     Không có đủ dữ liệu tổng hợp cho tháng ${month}/${year}
                 </td>
             </tr>
@@ -1254,18 +1350,33 @@
                 return;
             }
 
-            const summaryData = generateSummaryData(
+            let summaryData = generateSummaryData(
                 window.monthlyData[month] || [],
-                window.monthlyRevenue[month] || {},
-                window.monthlySchedule[month] || []
+                window.monthlyRevenue || {},
+                window.monthlySchedule[month] || [],
+                month,
+                year
             );
 
+            // Modified filtering logic
+            if (selectedFactory !== 'all') {
+                summaryData = summaryData.filter(row => row.company === selectedFactory);
+            }
+
+            if (positions.length > 0) {
+                const employeesWithPositions = window.monthlyData[month] || [];
+                summaryData = summaryData.filter(row => {
+                    if (row.isTotal) return true;
+                    const employee = employeesWithPositions.find(emp => emp.name === row.name);
+                    return employee && positions.includes(employee.position);
+                });
+            }
+
             tbody.innerHTML = summaryData.map((row) => `
-        <tr class="${row.isTotal ? 'font-bold bg-gray-100' : 'bg-white'}">
-            <td class="px-4 py-2 text-sm">${row.stt}</td>
+        <tr class="${row.isTotal ? 'font-bold bg-gray-100 cursor-pointer' : 'bg-white detail-row'}" 
+            ${row.isTotal ? `onclick="toggleDetails(this)"` : ''}>
             <td class="px-4 py-2 text-sm">${row.name}</td>
-            <td class="px-4 py-2 text-sm">${row.company}</td>
-            <td class="px-4 py-2 text-sm text-right">${formatCurrency(row.revenue)}</td>
+            <td class="px-4 py-2 text-sm text-right">${row.isTotal ? formatCurrency(row.revenue) : ''}</td>
             <td class="px-4 py-2 text-sm text-right">${!row.isTotal ? `(${row.workdays} buổi)` : ''}</td>
             <td class="px-4 py-2 text-sm text-right">${formatCurrency(row.salary)}</td>
             <td class="px-4 py-2 text-sm text-right">${row.percent}%</td>
@@ -1273,25 +1384,43 @@
     `).join('');
         }
 
+        //Ẩn hiên dòng nhân viên
+        function toggleDetails(row) {
+            const nextRow = row.nextElementSibling;
+            let currentRow = nextRow;
+
+            while (currentRow && !currentRow.querySelector('td:nth-child(2)').textContent) {
+                currentRow.style.display = currentRow.style.display === 'none' ? '' : 'none';
+                currentRow = currentRow.nextElementSibling;
+            }
+        }
+
+        // Update CSS to ensure proper initial state
+        document.head.insertAdjacentHTML('beforeend', `
+<style>
+    .detail-row { display: table-row; }
+    .cursor-pointer { cursor: pointer; }
+</style>
+`);
+
         // Function to update filters
         function updateFilters() {
             const factory = document.getElementById('factory-filter').value;
             const positions = getSelectedPositions();
             const select1 = document.getElementById('month-select-1');
             const select2 = document.getElementById('month-select-2');
-
             const month1 = parseInt(select1.value);
             const month2 = parseInt(select2.value);
 
+            // Cập nhật tất cả bảng với cùng bộ lọc
             updateTable(1, month1, factory, positions);
             updateTable(2, month2, factory, positions);
             updateRevenueTable(1, month1, factory);
             updateRevenueTable(2, month2, factory);
             updateWorkScheduleTable(1, month1, factory);
             updateWorkScheduleTable(2, month2, factory);
-            // Thêm 2 dòng này
-            updateSummaryTable(1, month1);
-            updateSummaryTable(2, month2);
+            updateSummaryTable(1, month1, factory, positions); // Thêm tham số factory, positions
+            updateSummaryTable(2, month2, factory, positions); // Thêm tham số factory, positions
             updateCharts();
         }
 
