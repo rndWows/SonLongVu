@@ -81,6 +81,17 @@
                         <tbody id="employee-data-1"></tbody>
                     </table>
                 </div>
+                <br>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng số giờ tăng ca</h3>
+                        <p class="text-2xl font-bold text-blue-600" id="total-hours-1">0</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-600">Tổng tiền tăng ca</h3>
+                        <p class="text-2xl font-bold text-green-600" id="total-salary-1">0</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Table Right -->
@@ -103,29 +114,7 @@
                         <tbody id="employee-data-2"></tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <!-- Summary Left -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">THỐNG KÊ TỔNG HỢP</h2>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-600">Tổng số giờ tăng ca</h3>
-                        <p class="text-2xl font-bold text-blue-600" id="total-hours-1">0</p>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-600">Tổng tiền tăng ca</h3>
-                        <p class="text-2xl font-bold text-green-600" id="total-salary-1">0</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Summary Right -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">THỐNG KÊ TỔNG HỢP</h2>
+                <br>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <h3 class="text-sm font-semibold text-gray-600">Tổng số giờ tăng ca</h3>
@@ -135,6 +124,63 @@
                         <h3 class="text-sm font-semibold text-gray-600">Tổng lương tăng ca</h3>
                         <p class="text-2xl font-bold text-green-600" id="total-salary-2">0</p>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary to Revenue Ratio Table -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- Left Table -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4 hidden">TỶ LỆ LƯƠNG / DOANH THU</h2>
+                <h2 class="text-lg font-semibold mb-4 hidden" id="ratio-title-1"></h2>
+                <div class="flex items-center justify-between">
+                    <div style="flex: 1;">
+                        <canvas id="ratio-chart-1"></canvas>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
+                                    lương</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tỷ lệ %
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratio-data-1"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right Table -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4 hidden">TỶ LỆ LƯƠNG / DOANH THU</h2>
+                <h2 class="text-lg font-semibold mb-4 hidden" id="ratio-title-2"></h2>
+                <div class="flex items-center justify-between">
+                    <div style="flex: 1;">
+                        <canvas id="ratio-chart-2"></canvas>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
+                                    lương</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tỷ lệ %
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratio-data-2"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -266,7 +312,7 @@
                     <div class="mt-4" style="height: 400px; position: relative;"> <!-- Thêm style -->
                         <canvas id="revenue-chart-2"></canvas>
                     </div>
-                    <!-- Bảng --> 
+                    <!-- Bảng -->
                     <table class="min-w-full mt-4 hidden">
                         <thead class="bg-gray-50">
                             <tr>
@@ -1436,11 +1482,174 @@
 
         // Update CSS to ensure proper initial state
         document.head.insertAdjacentHTML('beforeend', `
-<style>
-    .detail-row { display: table-row; }
-    .cursor-pointer { cursor: pointer; }
-</style>
-`);
+            <style>
+                .detail-row { display: table-row; }
+                .cursor-pointer { cursor: pointer; }
+            </style>
+            `);
+
+        // Update salary to revenue ratio table
+        function updateRatioTable(tableId, month, selectedFactory = 'all', positions = []) {
+            const tbody = document.getElementById(`ratio-data-${tableId}`);
+            const titleElement = document.getElementById(`ratio-title-${tableId}`);
+            const year = tableId === 1 ? window.currentLeftYear : window.currentRightYear;
+
+            titleElement.textContent = `Tháng ${month}/${year}`;
+
+            if (!window.monthlyData || !window.monthlyRevenue) {
+                tbody.innerHTML = `
+            <tr>
+                <td colspan="3" class="px-4 py-4 text-center text-gray-500">
+                    Không có đủ dữ liệu để tính tỷ lệ cho tháng ${month}/${year}
+                </td>
+            </tr>
+        `;
+                return;
+            }
+
+            const monthKey = `${month}_${year}`;
+            const longVuRevenue = window.monthlyRevenue[monthKey]?.['CÔNG TY TNHH SẢN XUẤT SƠN LONG VŨ'] || 0;
+
+            // Get filtered employee data
+            let employeeData = window.monthlyData[month] || [];
+
+            if (selectedFactory !== 'all') {
+                employeeData = employeeData.filter(emp => emp.factory === selectedFactory);
+            }
+
+            if (positions.length > 0) {
+                employeeData = employeeData.filter(emp => positions.includes(emp.position));
+            }
+
+            // Calculate total salary
+            const totalSalary = employeeData.reduce((sum, emp) => sum + emp.totalSalary, 0);
+
+            // Calculate percentage
+            const percentage = longVuRevenue ? ((totalSalary / longVuRevenue) * 100).toFixed(2) : 0;
+
+            tbody.innerHTML = `
+        <tr class="bg-white">
+            <td class="px-4 py-2 text-sm">${formatCurrency(longVuRevenue)}</td>
+            <td class="px-4 py-2 text-sm text-right">${formatCurrency(totalSalary)}</td>
+            <td class="px-4 py-2 text-sm text-right font-bold">${percentage}%</td>
+        </tr>
+    `;
+        }
+
+        // Update ratio chart function
+        function updateRatioChart(tableId, month, year) {
+            const chartCanvas = document.getElementById(`ratio-chart-${tableId}`);
+            const chartId = `ratio-chart-${tableId}`;
+
+            // Get data from filters  
+            const factory = document.getElementById('factory-filter').value;
+            const positions = getSelectedPositions();
+            const monthKey = `${month}_${year}`;
+            const longVuRevenue = window.monthlyRevenue[monthKey]?.['CÔNG TY TNHH SẢN XUẤT SƠN LONG VŨ'] || 0;
+
+            // Filter employee data
+            let employeeData = window.monthlyData[month] || [];
+            if (factory !== 'all') {
+                employeeData = employeeData.filter(emp => emp.factory === factory);
+            }
+            if (positions.length > 0) {
+                employeeData = employeeData.filter(emp => positions.includes(emp.position));
+            }
+
+            const totalSalary = employeeData.reduce((sum, emp) => sum + emp.totalSalary, 0);
+            const salaryPercentage = ((totalSalary / longVuRevenue) * 100).toFixed(2);
+
+            // Destroy existing chart
+            if (window[chartId] instanceof Chart) {
+                window[chartId].destroy();
+            }
+
+            // Set canvas dimensions
+            chartCanvas.style.height = '300px';
+            chartCanvas.style.width = '100%';
+
+            // Create gradients
+            const gradientSalary = chartCanvas.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradientSalary.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+            gradientSalary.addColorStop(1, 'rgba(37, 99, 235, 0.6)');
+
+            const gradientRevenue = chartCanvas.getContext('2d').createLinearGradient(0, 0, 0, 400);
+            gradientRevenue.addColorStop(0, 'rgba(16, 185, 129, 0.8)');
+            gradientRevenue.addColorStop(1, 'rgba(5, 150, 105, 0.6)');
+
+            // Create new chart
+            window[chartId] = new Chart(chartCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Chi phí lương', 'Doanh thu còn lại'],
+                    datasets: [{
+                        data: [totalSalary, longVuRevenue - totalSalary],
+                        backgroundColor: [gradientSalary, gradientRevenue],
+                        borderColor: ['rgb(37, 99, 235)', 'rgb(5, 150, 105)'],
+                        borderWidth: 2,
+                        borderRadius: 5,
+                        spacing: 5,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: [
+                                `Tỷ lệ Lương/Doanh thu: ${salaryPercentage}%`,
+                                `Tháng ${month}/${year}`
+                            ],
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                bottom: 30
+                            }
+                        },
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                const percentage = ((value / ctx.chart._metasets[0].total) * 100).toFixed(1);
+                                return percentage > 5 ? `${percentage}%` : '';
+                            },
+                            color: '#ffffff',
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            textStrokeColor: 'rgba(0,0,0,0.3)',
+                            textStrokeWidth: 3,
+                            textShadowBlur: 5,
+                            textShadowColor: 'rgba(0,0,0,0.3)'
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+
+
 
         // Function to update filters
         function updateFilters() {
@@ -1450,18 +1659,27 @@
             const select2 = document.getElementById('month-select-2');
             const month1 = parseInt(select1.value);
             const month2 = parseInt(select2.value);
+            const year1 = parseInt(select1.options[select1.selectedIndex].dataset.year);
+            const year2 = parseInt(select2.options[select2.selectedIndex].dataset.year);
 
-            // Cập nhật tất cả bảng với cùng bộ lọc
             updateTable(1, month1, factory, positions);
             updateTable(2, month2, factory, positions);
             updateRevenueTable(1, month1, factory);
             updateRevenueTable(2, month2, factory);
             updateWorkScheduleTable(1, month1, factory);
             updateWorkScheduleTable(2, month2, factory);
-            updateSummaryTable(1, month1, factory, positions); // Thêm tham số factory, positions
-            updateSummaryTable(2, month2, factory, positions); // Thêm tham số factory, positions
+            updateSummaryTable(1, month1, factory, positions);
+            updateSummaryTable(2, month2, factory, positions);
+            updateRatioTable(1, month1, factory, positions);
+            updateRatioTable(2, month2, factory, positions);
+
+            // Đồng bộ biểu đồ với bộ lọc
+            updateRatioChart(1, month1, year1);
+            updateRatioChart(2, month2, year2);
+
             updateCharts();
         }
+
 
         // Export to Excel
         function exportToExcel() {
@@ -1552,6 +1770,7 @@
             }
 
             updateMonthTitle('month-title-1', month1, year1);
+            updateMonthTitle('ratio-title-1', month1, year1);
             updateFilters();
         });
 
@@ -1589,6 +1808,7 @@
             }
 
             updateMonthTitle('month-title-2', month2, year2);
+            updateMonthTitle('ratio-title-2', month2, year2);
             updateFilters();
         });
 
@@ -1631,6 +1851,9 @@
                 updateMonthTitle('schedule-month-title-1', leftMonth, leftYear);
                 updateMonthTitle('schedule-month-title-2', rightMonth, rightYear);
 
+                updateMonthTitle('ratio-title-1', leftMonth, leftYear);
+                updateMonthTitle('ratio-title-2', rightMonth, rightYear);
+
                 // Fetch cả 3 loại dữ liệu
                 const [monthlyData, monthlyRevenue, monthlySchedule] = await Promise.all([
                     fetchAppSheetData(),
@@ -1653,6 +1876,12 @@
                 // Thêm 2 dòng cập nhật bảng lịch công việc
                 updateWorkScheduleTable(1, leftMonth, 'all');
                 updateWorkScheduleTable(2, rightMonth, 'all');
+
+                updateRatioTable(1, leftMonth, 'all', []);
+                updateRatioTable(2, rightMonth, 'all', []);
+
+                updateRatioChart(1, leftMonth, leftYear);
+                updateRatioChart(2, rightMonth, rightYear);
 
                 await updateCharts();
             } catch (error) {
