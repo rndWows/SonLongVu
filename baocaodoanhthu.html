@@ -10,14 +10,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script
         src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
-    <title>Báo Cáo Tăng Ca - TH24</title>
+    <title>Báo Cáo Tổng Hợp</title>
 </head>
 
 <body class="bg-gray-100">
     <div class=" mx-auto px-4 py-8">
         <!-- Header -->
         <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">BÁO CÁO TÌNH HÌNH TĂNG CA NHÂN VIÊN</h1>
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">BÁO CÁO TỔNG HỢP</h1>
 
             <!-- Filters Section -->
             <div class="space-y-4">
@@ -59,8 +59,112 @@
             </div>
         </div>
 
+        <!-- Factory Revenue Tables -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- Revenue Table Left -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">DOANH THU NHÀ MÁY</h2>
+                <h2 class="text-lg font-semibold mb-4" id="revenue-month-title-1"></h2>
+                <div class="overflow-x-auto">
+                    <div class="mt-4" style="height: 400px; position: relative;"> <!-- Thêm style -->
+                        <canvas id="revenue-chart-1"></canvas>
+                    </div>
+                    <!-- Bảng -->
+                    <table class="min-w-full mt-4">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="revenue-data-1"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Revenue Table Right -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">DOANH THU NHÀ MÁY</h2>
+                <h2 class="text-lg font-semibold mb-4" id="revenue-month-title-2"></h2>
+                <div class="overflow-x-auto">
+                    <div class="mt-4" style="height: 400px; position: relative;"> <!-- Thêm style -->
+                        <canvas id="revenue-chart-2"></canvas>
+                    </div>
+                    <!-- Bảng -->
+                    <table class="min-w-full mt-4">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="revenue-data-2"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary to Revenue Ratio Table -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <!-- Left Table -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4 hidden">TỶ LỆ LƯƠNG / DOANH THU</h2>
+                <h2 class="text-lg font-semibold mb-4 hidden" id="ratio-title-1"></h2>
+                <div class="flex items-center justify-between">
+                    <div style="flex: 1;">
+                        <canvas id="ratio-chart-1"></canvas>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
+                                    lương</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tỷ lệ %
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratio-data-1"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right Table -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-center text-gray-800 mb-4 hidden">TỶ LỆ LƯƠNG / DOANH THU</h2>
+                <h2 class="text-lg font-semibold mb-4 hidden" id="ratio-title-2"></h2>
+                <div class="flex items-center justify-between">
+                    <div style="flex: 1;">
+                        <canvas id="ratio-chart-2"></canvas>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Doanh thu
+                                </th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
+                                    lương</th>
+                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tỷ lệ %
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="ratio-data-2"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <!-- Table Left -->
             <div class="bg-white rounded-lg shadow-lg p-6">
                 <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BẢNG CHI TIẾT TĂNG CA VÀ LƯƠNG</h2>
@@ -128,62 +232,6 @@
             </div>
         </div>
 
-        <!-- Salary to Revenue Ratio Table -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <!-- Left Table -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4 hidden">TỶ LỆ LƯƠNG / DOANH THU</h2>
-                <h2 class="text-lg font-semibold mb-4 hidden" id="ratio-title-1"></h2>
-                <div class="flex items-center justify-between">
-                    <div style="flex: 1;">
-                        <canvas id="ratio-chart-1"></canvas>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Doanh thu
-                                </th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
-                                    lương</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tỷ lệ %
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="ratio-data-1"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Right Table -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4 hidden">TỶ LỆ LƯƠNG / DOANH THU</h2>
-                <h2 class="text-lg font-semibold mb-4 hidden" id="ratio-title-2"></h2>
-                <div class="flex items-center justify-between">
-                    <div style="flex: 1;">
-                        <canvas id="ratio-chart-2"></canvas>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Doanh thu
-                                </th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Chi phí
-                                    lương</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Tỷ lệ %
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="ratio-data-2"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
 
         <!-- Summary Tables - Thêm ngay trước thẻ đóng div container cuối cùng -->
         <div id="summary-tables" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
@@ -274,54 +322,6 @@
                             </tr>
                         </thead>
                         <tbody id="schedule-data-2"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Factory Revenue Tables -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <!-- Revenue Table Left -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">DOANH THU NHÀ MÁY</h2>
-                <h2 class="text-lg font-semibold mb-4" id="revenue-month-title-1"></h2>
-                <div class="overflow-x-auto">
-                    <div class="mt-4" style="height: 400px; position: relative;"> <!-- Thêm style -->
-                        <canvas id="revenue-chart-1"></canvas>
-                    </div>
-                    <!-- Bảng -->
-                    <table class="min-w-full mt-4">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="revenue-data-1"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Revenue Table Right -->
-            <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-center text-gray-800 mb-4">DOANH THU NHÀ MÁY</h2>
-                <h2 class="text-lg font-semibold mb-4" id="revenue-month-title-2"></h2>
-                <div class="overflow-x-auto">
-                    <div class="mt-4" style="height: 400px; position: relative;"> <!-- Thêm style -->
-                        <canvas id="revenue-chart-2"></canvas>
-                    </div>
-                    <!-- Bảng -->
-                    <table class="min-w-full mt-4">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Doanh thu
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="revenue-data-2"></tbody>
                     </table>
                 </div>
             </div>
