@@ -291,7 +291,7 @@
                         <canvas id="revenue-chart-1"></canvas>
                     </div>
                     <!-- Bảng -->
-                    <table class="min-w-full mt-4 hidden">
+                    <table class="min-w-full mt-4">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
@@ -313,7 +313,7 @@
                         <canvas id="revenue-chart-2"></canvas>
                     </div>
                     <!-- Bảng -->
-                    <table class="min-w-full mt-4 hidden">
+                    <table class="min-w-full mt-4">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nhà máy</th>
@@ -333,7 +333,7 @@
                 <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BIỂU ĐỒ SO SÁNH TĂNG CA</h2>
                 <canvas id="comparisonChart"></canvas>
             </div>
-            <div class="bg-white rounded-lg shadow-lg p-6">
+            <div class="bg-white rounded-lg shadow-lg p-6 hidden">
                 <h2 class="text-xl font-bold text-center text-gray-800 mb-4">BIỂU ĐỒ SO SÁNH TĂNG CA</h2>
                 <canvas id="factoryChart"></canvas>
             </div>
@@ -973,7 +973,6 @@
             </tr>
         `;
 
-                // Xóa biểu đồ nếu không có dữ liệu
                 const chartId = `revenue-chart-${tableId}`;
                 if (window[chartId] instanceof Chart) {
                     window[chartId].destroy();
@@ -990,24 +989,29 @@
 
             companyData.sort(([, a], [, b]) => b - a);
 
-            // Cập nhật bảng
-            if (companyData.length === 0) {
-                tbody.innerHTML = `
-            <tr>
-                <td colspan="2" class="px-4 py-4 text-center text-gray-500">
-                    Không có dữ liệu doanh thu ${selectedFactory !== 'all' ? `cho công ty ${selectedFactory}` : ''} trong tháng ${month}/${year}
-                </td>
-            </tr>
-        `;
-                return;
-            }
-
+            // Thêm phần update bảng vào đây
             tbody.innerHTML = companyData.map(([company, revenue], index) => `
         <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">
-            <td class="px-4 py-2 text-sm font-medium">${company}</td>
+            <td class="px-4 py-2 text-sm">${company}</td>
             <td class="px-4 py-2 text-sm text-right">${formatCurrency(revenue)}</td>
         </tr>
     `).join('');
+
+            // Tính tổng doanh thu của các công ty khác (không phải Long Vũ)
+            const totalOtherRevenue = companyData.reduce((sum, [company, revenue]) => {
+                if (company !== "CÔNG TY TNHH SẢN XUẤT SƠN LONG VŨ") {
+                    return sum + revenue;
+                }
+                return sum;
+            }, 0);
+
+            // Tạo dữ liệu mới cho biểu đồ tròn
+            const pieChartData = companyData
+                .filter(([company]) => company !== "CÔNG TY TNHH SẢN XUẤT SƠN LONG VŨ")
+                .map(([company, revenue]) => ({
+                    company: company,
+                    revenue: revenue
+                }));
 
             // Vẽ biểu đồ
             const chartId = `revenue-chart-${tableId}`;
@@ -1015,95 +1019,88 @@
                 window[chartId].destroy();
             }
 
-            Chart.register(ChartDataLabels); // Thêm dòng này ở đầu file hoặc trong hàm initialize
+            Chart.register(ChartDataLabels);
+
+            // Tạo màu gradient cho từng phần
+            const ctx = chartCanvas.getContext('2d');
+            const colors = pieChartData.map((_, index) => {
+                const hue = (index * 360 / pieChartData.length);
+                return `hsl(${hue}, 70%, 60%)`;
+            });
 
             window[chartId] = new Chart(chartCanvas, {
-                type: 'bar',
+                type: 'doughnut',
                 data: {
-                    labels: companyData.map(([company]) => company),
-                    datasets: [
-                        {
-                            label: 'CÔNG TY TNHH SẢN XUẤT SƠN LONG VŨ',
-                            data: companyData.map(([company, revenue]) =>
-                                company === "CÔNG TY TNHH SẢN XUẤT SƠN LONG VŨ" ? revenue : 0
-                            ),
-                            backgroundColor: 'rgba(34, 197, 94, 0.6)',
-                            borderColor: 'rgba(34, 197, 94, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Các công ty khác',
-                            data: companyData.map(([company, revenue]) =>
-                                company !== "CÔNG TY TNHH SẢN XUẤT SƠN LONG VŨ" ? revenue : 0
-                            ),
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }
-                    ]
+                    labels: pieChartData.map(item => item.company),
+                    datasets: [{
+                        data: pieChartData.map(item => item.revenue),
+                        backgroundColor: colors,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    height: 300,
+                    cutout: '60%',
                     plugins: {
                         datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            formatter: function (value) {
-                                if (value === 0) return ''; // Ẩn label cho giá trị 0
-                                if (value >= 1000000000) {
-                                    return (value / 1000000000).toFixed(1) + ' tỷ';
-                                }
-                                if (value >= 1000000) {
-                                    return (value / 1000000).toFixed(0) + ' tr';
-                                }
-                                return formatCurrency(value);
+                            formatter: (value) => {
+                                const percentage = (value / totalOtherRevenue * 100).toFixed(1);
+                                if (percentage < 3) return ''; // Ẩn label nếu phần trăm quá nhỏ
+                                return `${percentage}%`;
                             },
+                            color: '#fff',
                             font: {
-                                size: 11
-                            },
-                            offset: 5
+                                weight: 'bold',
+                                size: 12
+                            }
                         },
                         title: {
                             display: true,
-                            text: `Biểu đồ doanh thu tháng ${month}/${year}`,
+                            text: [
+                                `Tổng doanh thu: ${formatCurrency(totalOtherRevenue)}`,
+                                `Tháng ${month}/${year}`
+                            ],
                             font: {
-                                size: 16
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                bottom: 20
+                            }
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 11
+                                },
+                                generateLabels: function (chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.map((label, i) => {
+                                            const value = data.datasets[0].data[i];
+                                            const percentage = (value / totalOtherRevenue * 100).toFixed(1);
+                                            return {
+                                                text: `${label} (${formatCurrency(value)} - ${percentage}%)`,
+                                                fillStyle: colors[i],
+                                                hidden: isNaN(value) || value === 0,
+                                                index: i
+                                            };
+                                        });
+                                    }
+                                    return [];
+                                }
                             }
                         },
                         tooltip: {
                             callbacks: {
                                 label: function (context) {
-                                    return formatCurrency(context.raw);
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45,
-                                font: {
-                                    size: 9
-                                }
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function (value) {
-                                    if (value >= 1000000000) {
-                                        return (value / 1000000000).toFixed(1) + ' tỷ';
-                                    }
-                                    if (value >= 1000000) {
-                                        return (value / 1000000).toFixed(0) + ' tr';
-                                    }
-                                    return formatCurrency(value);
-                                },
-                                font: {
-                                    size: 12
+                                    const value = context.raw;
+                                    const percentage = (value / totalOtherRevenue * 100).toFixed(1);
+                                    return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
                                 }
                             }
                         }
@@ -1612,7 +1609,7 @@
                         title: {
                             display: true,
                             text: [
-                                `Tỷ lệ Lương/Doanh thu: ${salaryPercentage}%`,
+                                `Tỷ lệ Tổng Lương/Tổng Doanh thu Long Vũ: ${salaryPercentage}%`,
                                 `Tháng ${month}/${year}`
                             ],
                             font: {
